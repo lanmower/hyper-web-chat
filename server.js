@@ -1,4 +1,5 @@
-
+require('./relay.js')
+require('dotenv').config()
 global.crypto = require("hypercore-crypto");
 global.Packr = require("msgpackr").Packr;
 global.Hyperbee = require('hyperbee');
@@ -6,13 +7,12 @@ global.SDK = require("hyper-sdk");
 const express = global.express = require('express'); //runtime lib downloading/async
 const socketio = global.socketio = require('socket.io');
 const http = require('http');
-
 const { Client, Intents } = require('discord.js');
 const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
 client.once('ready', () => {
 	console.log('Ready!');
 });   
-client.login(process.env.TOKEN).catch(()=>{});
+client.login(process.env.DISCORD_TOKEN).catch(()=>{console.log('not logged in to discord')});
 
 
 (async () => {
