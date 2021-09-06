@@ -1,0 +1,79 @@
+<app>
+    <nav class="uk-navbar-container uk-navbar-transparent" uk-navbar>
+        <div class="uk-navbar-left uk-margin-small-top uk-margin-left">
+            <a href="#" uk-tooltip="channel deets" uk-toggle="#channal-list">
+                <i uk-icon="icon:list;"></i>
+                <b class="channelname">{state.channelName}</b>
+            </a>
+        </div>
+        <div class="uk-navbar-right">
+            <ul class="uk-iconnav">
+                <li class="uk-margin-right">
+                    <a href="#" style="margin-top:13px" uk-icon="icon: users;" uk-tooltip="user deets"
+                        uk-toggle="#user-list"></a>
+                </li>
+                <li class="uk-margin-right">
+                    <a href="#" style="margin-top:13px" uk-icon="icon: world;" uk-tooltip="browser"
+                    uk-toggle="#terminal"></a>
+                </li>
+            </ul>
+        </div>
+        <div class="uk-navbar-right">
+            <ul class="uk-iconnav">
+                <li class="uk-margin-right">
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <messages messages={state.messages}></messages>
+    <channellist channels={state.channels} emit={emit}></channellist>
+    <userlist name={state.name}></userlist>
+    <terminal></terminal>
+    <script>
+        export default {
+            emit:(action, input, cb) => {
+                    return socket.emit('tx', sign({ action, input, keyPair }), cb);
+            },
+            onMounted() {
+                const socket = io();
+                let keyPair = JSON.parse(localStorage.getItem('keys'));
+                if (!keyPair) {
+                    keyPair = nacl.sign.keyPair();
+                    const save = { publicKey: Buffer.from(keyPair.publicKey).toString('hex'), secretKey: Buffer.from(keyPair.secretKey).toString('hex') };
+                    localStorage.setItem('keys', JSON.stringify(save));
+                    console.log('saved');
+                } else {
+                    keyPair.secretKey = Buffer.from(keyPair.secretKey, 'hex');
+                    keyPair.publicKey = Buffer.from(keyPair.publicKey, 'hex');
+                }
+                const chatForm = document.querySelector('.messages--send');
+                const roomName = document.querySelector('.channel--name');
+                const userList = document.querySelector('.members');
+                const nameElement = document.getElementById('name');
+
+
+                emit('getProfile', {}, (res) => {
+                    console.log({ res })
+                    let name = res?.name;
+                    if (!name) {
+                        name = prompt("Display name?");
+                        emit('setProfile', { name });
+                    }
+                    this.update({name})
+                });
+                socket.on('message', message => {
+                    const messages = this.state.messages;
+                    messages.push(message);
+                    this.update({messages})
+                });
+                emit('getChannels', '', async channels => {
+                    await this.update({channels, channelName:channels[0].name});
+                    emit('display', { channel: channels[0].name }, (messages) => {
+                        console.log(messages);
+                        this.update({messages});
+                    });
+                })
+            }
+        }
+    </script>
+</app>

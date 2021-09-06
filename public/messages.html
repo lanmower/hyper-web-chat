@@ -1,0 +1,25 @@
+<messages>
+    <div class="uk-flex" style="position: absolute;top: 50px;bottom: 30px;left: 15px;right: 0px;">
+        <div>
+            <div class="messages--received uk-flex-column-reverse uk-flex uk-flex-column uk-padding-small "
+                uk-overflow-auto style="position: absolute; inset: 0px; bottom:14px; overflow-x: clip;">
+                <div each={ message in props.messages } class="text "><b class="meta">{message.name}</b><span style="font-size: 7px;">{window.moment(message.time).fromNow()}</span><div>{message.body}</div></div>
+            </div>
+            <form class="messages--send uk-position-bottom" style="margin-right:15px;">
+                <input type="text" onsubmit={sendMesage} class="messageinput uk-border-pill uk-padding-small"
+                    style="padding: 8px;border: none;width: 100%;margin-bottom: -32px;" placeholder="Message here" />
+            </form>
+        </div>
+    </div>
+    <script>
+        export default {
+            sendMessage:(e) => {
+                const body = e.target.elements[0].value;
+                this.props.emit('sendMessage', { body, channel: this.props.channel });
+                e.preventDefault();
+                e.target.elements[0].value = '';
+                e.target.elements[0].focus();
+            }
+        }
+    </script>
+</messages> 

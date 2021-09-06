@@ -1,0 +1,43 @@
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chat Server</title>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="js/lib/moment.js"></script>
+  <script src="js/lib/buffer.js"></script>
+  <script src="js/lib/packr.js"></script>
+  <script src="js/lib/nacl.js"></script>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uikit@3.7.2/dist/css/uikit.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/uikit@3.7.2/dist/js/uikit.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/uikit@3.7.2/dist/js/uikit-icons.min.js"></script>
+</head>
+
+<body class="uk-light uk-background-secondary uk-overflow-hidden" uk-height-viewport="expand: true">
+    <app></app>
+    <!-- scripts we need -->
+    <script type="riot" src="app.html"></script>
+    <script type="riot" src="channellist.html"></script>
+    <script type="riot" src="userlist.html"></script>
+    <script type="riot" src="terminal.html"></script>
+    <script type="riot" src="messages.html"></script>
+    <script src="https://unpkg.com/riot@6/riot+compiler.min.js"></script>
+    <script src="https://unpkg.com/@riotjs/route/route.js"></script>
+
+    <!-- mount this app -->
+    <script type="module">
+      (async()=>{
+        riot.register('router', route.Router)
+        riot.register('route', route.Route)
+        await riot.compile();
+        riot.mount("app");
+      })();
+    </script>
+
+  <script src="js/signer.js"></script>
+  <script src="css/style.css"></script>
+</body>
+
+</html>
