@@ -9,8 +9,8 @@ const create = (from) => {
     out['keys'[0]] = from.keyPair;
     return sign(out);
 };
-const verify = (input) => {
-  console.log(input);
+const verify = (message) => {
+      const input = packr.unpack(message);
       const verified = crypto.verify(
         input['transaction'[0]],
         input['signature'[0]],
@@ -19,6 +19,7 @@ const verify = (input) => {
       
       if (!verified) throw new Error("could not verify transaction");
       input['transaction'[0]] = packr.unpack(input['transaction'[0]]);
+      console.log(input.t.a);
       return input;
 };
 const sign = (input) => {

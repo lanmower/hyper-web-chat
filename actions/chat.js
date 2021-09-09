@@ -33,23 +33,24 @@ const actions = {
     })
   },
   sendMessage: async input => {
-    const channels = await api.getDB("message");
+    console.log(input)
+    const channel = await api.getDB('channel-'+input.channel);
     const profiles = await api.getDB("profile");
-    const sub = channels.sub(input.channel);
     const key = api.input.k;
     const loaded = await profiles.get(key);
     let name = input.name;
     if(loaded && loaded.value) {
       name = JSON.parse(loaded.value).name;
     }
-    await sub.put(new Date().getTime().toString(), JSON.stringify({name,key,time:new Date().getTime(),body:input.body}));
-    await api.emit(input.channel, 'message', {name,key,time:new Date().getTime(),body:input.body, discord:input.discord})
+    const chanData = JSON.stringify({name,key,time:api.time,body:input.body});
+    await channel.put(api.time.toString(), chanData);
+    await api.emit(input.channel, 'message', {channel:input.channel,name,key,time:new Date().getTime(),body:input.body, discord:input.discord});
     return "saved";
   },
-  display: input => {
+  getMessages: input => {
     return new Promise(async res=>{
-      const channels = await api.getDB("message");
-      const history = channels.sub(input.channel).createHistoryStream({reverse:true, limit:100});
+      const channel = await api.getDB('channel-'+input);
+      const history = channel.createHistoryStream({limit:100});
       const out = [];
       history.on('data', (data)=>{
         try {
@@ -57,8 +58,8 @@ const actions = {
         }catch(e) {}
       });
       history.on('end', async ()=>{
-        await api.emit(input.channel, 'join')
-        res(out.reverse())
+        await api.emit(input, 'join')
+        res({channel:input, messages:out.reverse()})
       })
     })
   },
@@ -78,7 +79,7 @@ const actions = {
       return out;
     })
   },  
-  createChannel: async input => {
+  setChannel: async input => {
     const db = await api.getDB("channel");
     const doc = {name:input, createdAt:new Date()};
     const json = JSON.stringify(doc);

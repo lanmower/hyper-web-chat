@@ -25,54 +25,37 @@
             </ul>
         </div>
     </nav>
-    <messages messages={state.messages}></messages>
+    <messages channel={state.channelName} messages={state.messages[state.channelName]} emit={emit}></messages>
     <channellist channels={state.channels} emit={emit}></channellist>
     <userlist name={state.name}></userlist>
     <terminal></terminal>
     <script>
         export default {
-            emit:(action, input, cb) => {
-                    return socket.emit('tx', sign({ action, input, keyPair }), cb);
+            state:{messages:{}},
+            actions:window.actions,
+            emit:(action, input='') => {
+                return new Promise((res)=>{
+                    if(socket.readyState === WebSocket.CONNECTING) {
+                        console.log('not connected, waiting');
+                        window.socket.addEventListener('open', (event) => {
+                            res(socket.send(sign({ action, input, keyPair })));
+                        });
+                    } else res(socket.send(sign({ action, input, keyPair })));
+
+                })
+                
             },
             onMounted() {
-                const socket = io();
-                let keyPair = JSON.parse(localStorage.getItem('keys'));
-                if (!keyPair) {
-                    keyPair = nacl.sign.keyPair();
-                    const save = { publicKey: Buffer.from(keyPair.publicKey).toString('hex'), secretKey: Buffer.from(keyPair.secretKey).toString('hex') };
-                    localStorage.setItem('keys', JSON.stringify(save));
-                    console.log('saved');
-                } else {
-                    keyPair.secretKey = Buffer.from(keyPair.secretKey, 'hex');
-                    keyPair.publicKey = Buffer.from(keyPair.publicKey, 'hex');
-                }
-                const chatForm = document.querySelector('.messages--send');
-                const roomName = document.querySelector('.channel--name');
-                const userList = document.querySelector('.members');
-                const nameElement = document.getElementById('name');
-
-
-                emit('getProfile', {}, (res) => {
-                    console.log({ res })
-                    let name = res?.name;
-                    if (!name) {
-                        name = prompt("Display name?");
-                        emit('setProfile', { name });
-                    }
-                    this.update({name})
-                });
-                socket.on('message', message => {
-                    const messages = this.state.messages;
-                    messages.push(message);
-                    this.update({messages})
-                });
-                emit('getChannels', '', async channels => {
-                    await this.update({channels, channelName:channels[0].name});
-                    emit('display', { channel: channels[0].name }, (messages) => {
-                        console.log(messages);
-                        this.update({messages});
-                    });
-                })
+                socket.onmessage = async function (event) {
+                    var arrayBuffer = await event.data.arrayBuffer();
+                    var buffer = Buffer.from(arrayBuffer);
+                    const message = packr.unpack(buffer);
+                    console.log(message)
+                    if(typeof this.actions[message.action] == 'function') actions[message.action].bind(this)(message.i);
+                }.bind(this);
+                this.emit('getChannels')
+                this.emit('getProfile')
+                
             }
         }
     </script>

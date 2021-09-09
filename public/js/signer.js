@@ -18,5 +18,5 @@ window.sign = (from) => {
   out[C.TRANSACTION] = new Uint8Array(packed);
   out[C.SIGNATURE] = nacl.sign.detached(out[C.TRANSACTION], keyUint8Array);
   out[C.PUBLICKEY] = new Uint8Array(Buffer.from(from.keyPair.publicKey, "hex"));
-  return out;
+  return packr.pack(out);
 };

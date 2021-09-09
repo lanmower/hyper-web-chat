@@ -1,22 +1,24 @@
 <messages>
     <div class="uk-flex" style="position: absolute;top: 50px;bottom: 30px;left: 15px;right: 0px;">
         <div>
-            <div class="messages--received uk-flex-column-reverse uk-flex uk-flex-column uk-padding-small "
-                uk-overflow-auto style="position: absolute; inset: 0px; bottom:14px; overflow-x: clip;">
-                <div each={ message in props.messages } class="text "><b class="meta">{message.name}</b><span style="font-size: 7px;">{window.moment(message.time).fromNow()}</span><div>{message.body}</div></div>
+            <div if={props.messages} class="messagesreceived uk-flex-column-reverse uk-flex uk-flex-column uk-padding-small "
+                uk-overflow-auto style="position: absolute; inset: 0px; bottom:14px; overflow-x: clip; padding-bottom: 32px;">
+                <div each={ message in props.messages } class="text "><b class="meta">{message?message.name:''}</b><span style="font-size: 7px;">{window.moment(message.time).fromNow()}</span><div>{message.body}</div></div>
             </div>
-            <form class="messages--send uk-position-bottom" style="margin-right:15px;">
-                <input type="text" onsubmit={sendMesage} class="messageinput uk-border-pill uk-padding-small"
+            <form class="messagessend uk-position-bottom" onsubmit={sendMessage} style="margin-right:15px;">
+                <input type="text" class="messageinput uk-border-pill uk-padding-small"
                     style="padding: 8px;border: none;width: 100%;margin-bottom: -32px;" placeholder="Message here" />
+                <submit class="uk-button uk-float-right" style="margin-top: 6px;float: right;margin-right: -10px;" onclick={sendMessage} uk-icon="commenting"></submit>
             </form>
         </div>
     </div>
     <script>
         export default {
-            sendMessage:(e) => {
-                const body = e.target.elements[0].value;
-                this.props.emit('sendMessage', { body, channel: this.props.channel });
+            sendMessage(e) {
                 e.preventDefault();
+                const body = e.target.elements[0].value;
+                console.log('sending', body);
+                this.props.emit('sendMessage', { body, channel: this.props.channel });
                 e.target.elements[0].value = '';
                 e.target.elements[0].focus();
             }

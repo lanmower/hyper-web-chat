@@ -4,12 +4,39 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Chat Server</title>
-  <script src="/socket.io/socket.io.js"></script>
   <script src="js/lib/moment.js"></script>
-  <script src="js/lib/buffer.js"></script>
-  <script src="js/lib/packr.js"></script>
+  <script src="https://bundle.run/buffer@6.0.3"></script>
+  <script src="https://unpkg.com/msgpackr@1.2.5/dist/index.js"></script>
   <script src="js/lib/nacl.js"></script>
-  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .messagesreceived::-webkit-scrollbar-track {
+      -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+      border-radius: 10px;
+    }
+
+    .messagesreceived::-webkit-scrollbar {
+      width: 12px;
+    }
+
+    .messagesreceived::-webkit-scrollbar-thumb {
+      border-radius: 10px;
+      -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, .3);
+      background-color: #555;
+    }
+
+    .messagesreceived {
+      background: #1e1e1e;
+    }
+
+    *:focus {
+      outline: none;
+    }
+
+    .messageinput {
+      color: #ccc;
+      background: #40454a;
+    }
+    </style>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uikit@3.7.2/dist/css/uikit.min.css" />
   <script src="https://cdn.jsdelivr.net/npm/uikit@3.7.2/dist/js/uikit.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/uikit@3.7.2/dist/js/uikit-icons.min.js"></script>
@@ -19,6 +46,7 @@
     <app></app>
     <!-- scripts we need -->
     <script type="riot" src="app.html"></script>
+    <script type="riot" src="editchannel.html"></script>
     <script type="riot" src="channellist.html"></script>
     <script type="riot" src="userlist.html"></script>
     <script type="riot" src="terminal.html"></script>
@@ -29,6 +57,18 @@
     <!-- mount this app -->
     <script type="module">
       (async()=>{
+        window.socket = new WebSocket("wss://"+window.location.host);
+          window.Buffer = buffer.Buffer;
+          window.keyPair = JSON.parse(localStorage.getItem('keys'));
+          if (!window.keyPair) {
+              window.keyPair = nacl.sign.keyPair();
+              const save = { publicKey: Buffer.from(window.keyPair.publicKey).toString('hex'), secretKey: Buffer.from(window.keyPair.secretKey).toString('hex') };
+              localStorage.setItem('keys', JSON.stringify(save));
+              console.log('saved');
+          } else {
+              window.keyPair.secretKey = Buffer.from(window.keyPair.secretKey, 'hex');
+              window.keyPair.publicKey = Buffer.from(window.keyPair.publicKey, 'hex');
+          }
         riot.register('router', route.Router)
         riot.register('route', route.Route)
         await riot.compile();
@@ -36,8 +76,8 @@
       })();
     </script>
 
+  <script src="js/actions.js"></script>
   <script src="js/signer.js"></script>
-  <script src="css/style.css"></script>
 </body>
 
 </html>

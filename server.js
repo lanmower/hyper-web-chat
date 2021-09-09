@@ -37,32 +37,34 @@ client.login(process.env.DISCORD_TOKEN).catch(()=>{console.log('not logged in to
   app.use(express.static('public'));
 
   const server = http.createServer(app);
-  const io = socketio(server);
+  //const io = socketio(server);
+const packr = new Packr();
 
   const { Webhook } = require('discord-webhook-node');
-  
-  const emit = async (to, type, args, socket) => { 
-    if(type == 'join') {
-      socket.join(to);
-    }
-    if(type == 'message' && !args.discord) {
+  //var expressWs = require('express-ws')(app);
+  const {WebSocketServer} = require('ws');
+  const wss = new WebSocketServer({ server });
+  wss.on('connection', function connection(ws) {
+    console.log('connection');
+    ws.on('message', async function incoming(message) {
+      const start = new Date().getTime();
+      const out = verify.verify(message);
+      const socketEmit = (to, type, args)=>{emit(to, type, args, ws)};
+      const ret = await action(out, socketEmit);
+      ws.send(packr.pack({action:out.t.a,i:ret}));
+    });
+  });
+  const emit = async (to, action, args, ws) => { 
+    if(action == 'message' && !args.discord) {
       const hook = new Webhook("https://ptb.discord.com/api/webhooks/880355945081884672/nHXVX4OUKEky8c5-aHdr-DmbZue5c3PkemVTE2kc8esVP3nYYeLH1jrXroQRuMTjlQYW");
       const IMAGE_URL = 'https://homepages.cae.wisc.edu/~ece533/images/airplane.png';
       hook.setUsername(args.name);
       hook.setAvatar(IMAGE_URL);
       hook.send(args.body);
     }
-    io.to(to).emit(type, args); 
+    ws.send(packr.pack({action,i:args}))
+    //io.to(to).emit(type, args); 
   };
-  io.on('connection', socket => {
-    
-    socket.on('tx', async (data, ack) => {
-      const start = new Date().getTime();
-      const out = verify.verify(data);
-      const ret = await action(out, emit, socket);
-      if(typeof ack == 'function') ack(ret);
-    })
-  });
   const PORT = process.env.PORT || 3000;
   server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
   //loaded();
