@@ -1,0 +1,39 @@
+<modal>
+      <button onclick={this.open}>Open</button>
+      <div class='modal-overlay' if={state.display} onclick={close}>
+        <div class='uk-background-secondary modal-body'  onclick={noclose}>
+          <slot/>
+        </div>
+      </div>
+  <script>
+  export default {
+    // state: {display:false},
+    state: close(),
+    open(){
+      this.update({display:true})
+    },
+    noclose(e){
+      e.stopPropagation()
+    },
+    close(){
+      this.update({display:false})
+    },
+  }
+  </script>
+    <style scoped>
+    .modal-overlay{
+      z-index:1001;
+      position:fixed;
+      top:0px;
+      left:0px;
+      bottom:0px;
+      right:0px;
+      background-color:rgba(0,0,0,0.75);
+    }
+    .modal-body {
+      margin:30px;
+      z-index:1002;
+      padding:30px;
+    }
+  </style>
+</modal>
