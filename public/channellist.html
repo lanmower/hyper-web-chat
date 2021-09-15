@@ -1,19 +1,27 @@
 <channellist>
-    <div id="channal-list" onclick="{(e)=>{window.UIkit.offcanvas('#channal-list').hide()}}" uk-offcanvas="overlay: true; bg-close:false; mode: none;">
+    <div id="channal-list" uk-offcanvas="overlay: false; bg-close:false; mode: push">
         <div class="uk-offcanvas-bar">
             <button class="uk-offcanvas-close" type="button" uk-close></button>
         </div>
         <div class="uk-offcanvas-bar uk-flex uk-flex-column">
             <ul class="uk-nav uk-nav-default">
-                <li><a href="#create-channel" uk-toggle >Create Channel</a></li>
+                <li><editchannel id="create-channel" emit={props.emit} channel='{{}}'></editchannel></li>
             </ul>
             <ul class="channels uk-nav uk-nav-default">
-                <li each={channel in props.channels}><a onclick="{()=>{props.emit('getMessages', channel.name)}}">{channel.name}</a></li>            </ul>
-
+                <li each={channel in props.channels}>
+                    <a onclick="{()=>{props.emit('getMessages', channel.name)}}">{channel.name}</a>
+                    <editchannel id="edit-channel" emit={props.emit} channel='{channel}'></editchannel>
+                </li>
+            </ul>
         </div>
-        <editchannel id="create-channel" emit={props.emit}></editchannel>
     </div>
     <script>
 
+        export default {
+            state: {
+                selected:{},
+                modal:null
+            },
+        }
     </script>
 </channellist>

@@ -31,17 +31,15 @@ client.login(process.env.DISCORD_TOKEN).catch(()=>{console.log('not logged in to
 
   const app = express();
   app.use(function (req, res, next) {
-//    res.set('Cache-control', 'public, max-age=300')
+    res.set('Cache-control', 'public, max-age=300')
     next();
   })
   app.use(express.static('public'));
 
   const server = http.createServer(app);
-  //const io = socketio(server);
-const packr = new Packr();
+  const packr = new Packr();
 
   const { Webhook } = require('discord-webhook-node');
-  //var expressWs = require('express-ws')(app);
   const {WebSocketServer} = require('ws');
   const wss = new WebSocketServer({ server });
   wss.on('connection', function connection(ws) {
@@ -49,10 +47,17 @@ const packr = new Packr();
     ws.on('message', async function incoming(message) {
       const start = new Date().getTime();
       const out = verify.verify(message);
+      console.log(out);
       const socketEmit = (to, type, args)=>{emit(to, type, args, ws)};
       const ret = await action(out, socketEmit);
       ws.send(packr.pack({action:out.t.a,i:ret}));
     });
+    ws.on('close',()=>{
+
+    })
+    ws.on('error',()=>{
+
+    })
   });
   const emit = async (to, action, args, ws) => { 
     if(action == 'message' && !args.discord) {
@@ -63,9 +68,7 @@ const packr = new Packr();
       hook.send(args.body);
     }
     ws.send(packr.pack({action,i:args}))
-    //io.to(to).emit(type, args); 
-  };
+  }; 
   const PORT = process.env.PORT || 3000;
   server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-  //loaded();
 })()

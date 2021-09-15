@@ -4,7 +4,7 @@ const cores = [];
 
 let sdkcache = null;
 exp.getDB = async name => {
-    const sdk = sdkcache || (sdkcache = await SDK({ applicationName: 'hyperchat' }));
+    const sdk = sdkcache || (sdkcache = await SDK({ applicationName: 'hyperchat', keyEncoding: 'utf-8' }));
     if (cores[name]) return cores[name].bee;
     const core = sdk.Hypercore(name);
     await core.ready();

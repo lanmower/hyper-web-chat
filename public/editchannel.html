@@ -1,35 +1,41 @@
 <editchannel>
-    <div id={props.id} class="uk-flex-top" uk-modal>
-        <div class="uk-modal-dialog uk-background-secondary uk-modal-body">
+    <modal>
+    <div class={props.id} class="uk-flex-top">
             <h2 class="uk-modal-title">Channel</h2>
             <form onsubmit="{submitHandler}">
                 <input onkeyup="{  (e)=>{edit(e, 'name')} }" class="uk-input uk-border-pill uk-padding-small uk-margin" type="text"
-                    placeholder="Channel Name" style="border: none;">
+                    placeholder="Channel Name" value="{props.channel.name}" style="border: none;">
                 <input onkeyup="{ (e)=>{edit(e, 'webhook')} }" class="uk-input uk-border-pill uk-padding-small uk-margin" type="text"
-                    placeholder="Webhook (optional)" style="border: none;">
+                    placeholder="Webhook (optional)" value="{props.channel.hook}" style="border: none;">
                 <input onkeyup="{  (e)=>{edit(e, 'discordId')} }" class="uk-input uk-border-pill uk-padding-small uk-margin" type="text"
-                    placeholder="Discord channel ID (optional)" style="border: none;">
+                    placeholder="Discord channel ID (optional)" value="{props.channel.discordId}" style="border: none;">
             </form>
             <button class="uk-modal-close-default" type="button" uk-close></button>
             <div class="uk-text-right">
                 <button class="uk-button uk-button-default uk-modal-close" type="button">Cancel</button>
-                <button class="uk-button uk-button-secondary" onclick="{submitHandler}" type="button">Save</button>
+                <button class="uk-button uk-button-secondary" onclick={submitHandler} type="button">Save</button>
             </div>
-        </div>
     </div>
+    </modal>
     <script>
         export default {
-            state: {
-                name: ''
-            },
             edit(e, name) {
                 const conf = {};
                 conf[name] = e.target.value;
                 this.update(conf)
             },
+            onBeforeMount(props, state) {
+                this.state={
+                    id: props.channel.id,
+                    name: props.channel.name,
+                    hook: props.channel.hook,
+                    discordId: props.channel.discordId,
+                }
+            },
             async submitHandler(e) {
-                await this.props.emit('setChannel', this.state.name);
-                this.props.displayChannel(this.state.name);
+                await this.props.emit('setChannel', this.state);
+                this.props.emit('getMessages', this.state.name);
+                this.props.emit('getChannels');
             }
         }
     </script>
