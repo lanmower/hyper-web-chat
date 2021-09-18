@@ -1,106 +1,99 @@
 /* global api */
 
-async function setProfile(input) {
+async function setProfile(profile) {
   const db = await api.getDB("profile");
   const key = api.input.k;
-  await db.put(key, JSON.stringify(input));
-  return "saved";
+  await db.put(key, JSON.stringify(profile));
 }
 
-async function getProfile(input) {
-  try {
-    const db = await api.getDB("profile");
-    const key = api.input.k;
-    const out = JSON.parse((await db.get(key)).value);
-    return out;
-  } catch (e) {
-    return null;
-  }
+async function getProfile() {
+  const db = await api.getDB("profile");
+  const key = api.input.k;
+  const out = JSON.parse( (await db.get(key)) ?.value );
+  return out;
 }
 
-async function getProfiles(input) {
+async function getProfiles() {
   return new Promise(async res=>{
     const db = await api.getDB("profile");
     const read = db.createReadStream();
     const out = [];
-    read.on('data', (data)=>{
-      try {
-        out.push(JSON.parse(data.value));
-      }catch(e) {}
-    });
-    read.on('end', ()=>{
-      res(out)
-    })
+    read.on('data', data=>{out.push(JSON.parse(data?.value))});
+    read.on('end', ()=>{res(out)})
     return out;
   })
 }
 
 async function sendMessage(input) {
-  console.log(input)
-  const channel = await api.getDB('channel-'+input.channel);
+  const db = await api.getDB("channel");
+  const channelId = Buffer.from(input.channelId, 'hex');
+  const channel = JSON.parse((await db.get(channelId)).value); 
+  const messages = await api.getDB(input.channelId+'-channel');
   const profiles = await api.getDB("profile");
   const key = api.input.k;
   const loaded = await profiles.get(key);
+  const time = new Date().getTime();
   let name = input.name;
   if(loaded && loaded.value) {
-    name = JSON.parse(loaded.value).name;
+    name = JSON.parse(loaded?.value).name;
   }
+  console.log(api.time);
   const chanData = JSON.stringify({name,key,time:api.time,body:input.body});
-  await channel.put(api.time.toString(), chanData);
-  await api.emit(input.channel, 'message', {channel:input.channel,name,key,time:new Date().getTime(),body:input.body, discord:input.discord});
-  return "saved";
+  const msgid = Buffer.from(api.time.toString(), 'utf-8');
+  await messages.put(msgid, chanData);
+  const output = {channel,name,key,time,body:input.body,fromDiscord:input.fromDiscord}
+  await api.broadcast(input.channelId, 'message', output);
 }
 
-function getMessages(input) {
+function getMessages(channelId) {
   return new Promise(async res=>{
-    const channel = await api.getDB('channel-'+input);
+    const channel = await api.getDB(channelId.toString()+'-channel');
     const history = channel.createHistoryStream({limit:100});
     const out = [];
     history.on('data', (data)=>{
-      try {
-        out.push(JSON.parse(data.value));
-      }catch(e) {}
+      out.push(JSON.parse(data?.value));
     });
     history.on('end', async ()=>{
-      await api.emit(input, 'join')
-      res({channel:input, messages:out.reverse()})
+      await api.emit(channelId, 'join')
+      res({channelId, messages:out.reverse()})
     })
-  })
+  }).catch(()=>{throw e})
 }
 
-async function getChannels(input) {
+async function getPermissions(channelId) {
+  const db = await api.getDB("permission");
+  const roles = JSON.parse((await db.get(Buffer.from('roles', 'utf-8')))?.value);
+  const permissions = JSON.parse((await db.get(Buffer.from(channelId, 'utf-8')))?.value);
+  return {roles,permissions};
+}
+
+async function getChannels() {
   return new Promise(async res=>{
     const db = await api.getDB("channel");
     const read = db.createReadStream();
-    const out = [];
+    const out = {};
     read.on('data', (data)=>{
-      try {
-        out.push(JSON.parse(data.value));
-      }catch(e) {}
+      const parsed = JSON.parse(data?.value);
+      if(parsed) out[parsed.id] = parsed;
     });
-    read.on('end', ()=>{
-      res(out)
-    })
+    read.on('end', ()=>{res(out)});
     return out;
   })
 }
 
-async function removeChannel(input) {
+async function removeChannel(id) {
   const db = await api.getDB("channel");
   const createdAt = new Date().getTime();
-  await db.del(input); 
-  return "saved";
+  await db.del(Buffer.from(id, 'hex')); 
 }
 
 async function setChannel(input) {
-  console.log(input.hash);
   const db = await api.getDB("channel");
   const createdAt = new Date().getTime();
-  const id = input.id||api.crypto.data(new Uint8Array(Buffer.from(input.name+createdAt))).toString('hex');
-  const doc = {name:input.name, hook:input.hook, discordId:input.discordId, createdAt, id};
+  var id = input.id||api.crypto.randomBytes(16).toString('hex');
+  const doc = {name:input.name, discordWebhook:input.discordWebhook, discordId:input.discordId, createdAt, id};
   const json = JSON.stringify(doc);
-  await db.put(id, json); 
-  return "saved";
+  await db.put(Buffer.from(id, 'hex'), json); 
 }
 
 const actions = { 

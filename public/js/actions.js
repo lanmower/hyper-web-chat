@@ -10,22 +10,21 @@ window.actions = {
     },
     async getChannels(channels) {
         console.log('channels', channels, this)
-        await this.update({channels, channelName:channels[0].name});
-        this.emit('getMessages', channels[0].name);
+        const channelId = Object.keys(channels)[0];
+        await this.update({channels, channelId});
+        this.emit('getMessages', channelId); 
     },
     getMessages(input) {
-        console.log('messages', input, this)
-        const {messages,channel} = input;
-        this.state.messages[channel] = messages;
-        console.log(messages, channel, this);
-        this.update({messages:this.state.messages, channelName:channel});
+        console.log({input})
+        const {messages,channelId} = input;
+        this.state.messages[channelId] = messages;
+        this.update({messages:this.state.messages, channelId});
     },
     message(input) {
-        console.log('message', input)
-        const messages = this.state.messages;
-        if(!messages[input.channel]) messages[input.channel] = [];
         console.log({input});
-        messages[input.channel].unshift(input);
+        const messages = this.state.messages;
+        if(!messages[input.channel.id]) messages[input.channel.id] = [];
+        messages[input.channel.id].unshift(input);
         this.update({ messages })
     }
 

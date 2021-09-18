@@ -2,26 +2,26 @@
     <nav class="uk-navbar-container uk-navbar-transparent" uk-navbar>
         <div class="uk-navbar-left">
             <ul class="uk-iconnav">
-                <li class="uk-margin">
+                <li class=" uk-margin-left">
                     <a href="#" 
-                       style="margin-top:13px" 
+                       style="margin-top:13px !important;"
                        uk-icon="icon:list;" 
                        uk-tooltip="name:🚪 Open; delay:500; ratio: 3.5" 
                        uk-toggle="#channal-list"></a>
                 </li>
-                <li class="uk-margin">
-                    <b class="channelname">{state.channelName}</b>
+                <li class="uk-margin-small">
+                    <b class="channelname">{state?.channels[state.channelId]?.name}</b>
                 </li>
             </ul>
         </div>
         <div class="uk-navbar-right">
             <ul class="uk-iconnav">
-                <li class="uk-margin-right">
-                    <a href="#" style="margin-top:13px" uk-icon="icon: users;" uk-tooltip="title:user deets; delay:500"
+                <li class="uk-margin-small-top">
+                    <a href="#" uk-icon="icon: users;" uk-tooltip="title:user deets; delay:500"
                         uk-toggle="#user-list"></a>
                 </li>
-                <li class="uk-margin-right">
-                    <a href="#" style="margin-top:13px" uk-icon="icon: world;" uk-tooltip="title: browser; delay: 500"
+                <li class="uk-margin-small">
+                    <a href="#" uk-icon="icon: world;" uk-tooltip="title: browser; delay: 500"
                     uk-toggle="#terminal"></a>
                 </li>
             </ul>
@@ -33,13 +33,13 @@
             </ul>
         </div>
     </nav>
-    <messages channel={state.channelName} messages={state.messages[state.channelName]} emit={emit}></messages>
+    <messages channelId={state.channelId} messages={state.messages} emit={emit}></messages>
     <channellist channels={state.channels} emit={emit} parentUpdate={update}></channellist>
     <userlist name={state.name}></userlist>
-    <terminal hash={state.channelName}></terminal>
+    <terminal hash={state.channelId}></terminal>
     <script>
         export default {
-            state:{messages:{}, modalContent:''},
+            state:{messages:{}, channels:{}},
             actions:window.actions,
             emit(action, input='') {
                 const self = this;
@@ -57,35 +57,12 @@
                 })
             },
             onMounted() {
-                const self = this;
-                 var timeout = 10;
-                function connect(address, protocols, options) {
-                    let ws = new WebSocket(address, protocols, options);
-                    let timerTimeout = setTimeout(() => ws.close(), timeout * 1000); // force close unless cleared on 'open'
-                    ws.addEventListener('open', (event) => {
-                        console.log('Opened. Clearing timeout ...');
-                        clearTimeout(timerTimeout);
-                        // do your thing here, like ws.send(...);
-                    });
-                    ws.onmessage = async function (event) {
-                        var arrayBuffer = await event.data.arrayBuffer();
-                        var buffer = Buffer.from(arrayBuffer);
-                        const message = packr.unpack(buffer);
-                        if(typeof this.actions[message.action] == 'function') actions[message.action].bind(self)(message.i);
-                    }.bind(this);
-                    ws.addEventListener('close', (event) => {
-                        clearTimeout(timerTimeout);
-                        console.error('Websocket connection closed. Reconnecting in %f seconds ...', timeout);
-                        setTimeout(() => connect(address, protocols, options), timeout * 1000);
-                    });
-                    ws.addEventListener('error', reason => console.error('Websocket error: ', reason));
-                    return ws;
-                }
-                window.socket = connect("wss://"+window.location.host)
+                const self = window.app = this;
+                
                 console.log('mounted', this);
                 this.emit('getChannels')
                 this.emit('getProfile')
             }
-        }
+        };
     </script>
 </app>

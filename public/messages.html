@@ -1,9 +1,9 @@
 <messages>
     <div class="uk-flex" style="position: absolute;top: 50px;bottom: 30px;left: 15px;right: 0px;">
         <div>
-            <div if={props.messages} class="messagesreceived uk-flex-column-reverse uk-flex uk-flex-column uk-padding-small "
+            <div if={props.messages[props.channelId]} class="messagesreceived uk-flex-column-reverse uk-flex uk-flex-column uk-padding-small "
                 uk-overflow-auto style="position: absolute; inset: 0px; bottom:14px; overflow-x: clip; padding-bottom: 32px;">
-                <div each={ message in props.messages } class="text "><b class="meta">{message?message.name:''}</b><span style="font-size: 7px;">{window.moment(message.time).fromNow()}</span><div>{message.body}</div></div>
+                <div each="{ message in props.messages[props.channelId] }" class="text "><b class="meta">{message?message.name:''}</b><span style="font-size: 7px;">{window.moment(message.time).fromNow()}</span><div>{message.body}</div></div>
             </div>
             <form class="messagessend uk-position-bottom" onsubmit={sendMessage} style="margin-right:15px;">
                 <input type="text" class="messageinput uk-border-pill uk-padding-small"
@@ -18,7 +18,7 @@
                 e.preventDefault();
                 const body = e.target.elements[0].value;
                 console.log('sending', body);
-                this.props.emit('sendMessage', { body, channel: this.props.channel });
+                this.props.emit('sendMessage', { body, channelId: this.props.channelId });
                 e.target.elements[0].value = '';
                 e.target.elements[0].focus();
             }

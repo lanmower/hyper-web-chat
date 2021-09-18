@@ -8,20 +8,11 @@
                 <li><editchannel id="create-channel" emit={props.emit} channel='{{}}'></editchannel></li>
             </ul>
             <ul class="channels uk-nav uk-nav-default">
-                <li each={channel in props.channels}>
-                    <a onclick="{()=>{props.emit('getMessages', channel.name)}}">{channel.name}</a>
-                    <editchannel id="edit-channel" emit={props.emit} channel='{channel}'></editchannel>
+                <li each="{channel in Object.entries(props.channels)}">
+                    <a onclick="{()=>{props.emit('getMessages', channel[0])}}">{channel[1].name}</a>
+                    <editchannel id="edit-channel" emit={props.emit} channel='{channel[1]}'></editchannel>
                 </li>
             </ul>
         </div>
     </div>
-    <script>
-
-        export default {
-            state: {
-                selected:{},
-                modal:null
-            },
-        }
-    </script>
 </channellist>

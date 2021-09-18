@@ -5,8 +5,8 @@
             <form onsubmit="{submitHandler}">
                 <input onkeyup="{  (e)=>{edit(e, 'name')} }" class="uk-input uk-border-pill uk-padding-small uk-margin" type="text"
                     placeholder="Channel Name" value="{props.channel.name}" style="border: none;">
-                <input onkeyup="{ (e)=>{edit(e, 'webhook')} }" class="uk-input uk-border-pill uk-padding-small uk-margin" type="text"
-                    placeholder="Webhook (optional)" value="{props.channel.hook}" style="border: none;">
+                <input onkeyup="{ (e)=>{edit(e, 'discordWebhook')} }" class="uk-input uk-border-pill uk-padding-small uk-margin" type="text"
+                    placeholder="Webhook (optional)" value="{props.channel.discordWebhook}" style="border: none;">
                 <input onkeyup="{  (e)=>{edit(e, 'discordId')} }" class="uk-input uk-border-pill uk-padding-small uk-margin" type="text"
                     placeholder="Discord channel ID (optional)" value="{props.channel.discordId}" style="border: none;">
             </form>
@@ -28,13 +28,12 @@
                 this.state={
                     id: props.channel.id,
                     name: props.channel.name,
-                    hook: props.channel.hook,
+                    discordWebhook: props.channel.discordWebhook,
                     discordId: props.channel.discordId,
                 }
             },
             async submitHandler(e) {
                 await this.props.emit('setChannel', this.state);
-                this.props.emit('getMessages', this.state.name);
                 this.props.emit('getChannels');
             }
         }

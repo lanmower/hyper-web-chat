@@ -60,6 +60,32 @@
     <!-- mount this app -->
     <script type="module">
       (async()=>{
+          var timeout = 10;
+          function connect(address, protocols, options) {
+              let ws = window.socket = new WebSocket(address, protocols, options);
+              let timerTimeout = setTimeout(() => ws.close(), timeout * 1000); // force close unless cleared on 'open'
+              ws.addEventListener('open', (event) => {
+                  console.log('Opened. Clearing timeout ...');
+                  clearTimeout(timerTimeout);
+              });
+              ws.onmessage = async function (event) {
+                  var arrayBuffer = await event.data.arrayBuffer();
+                  var buffer = Buffer.from(arrayBuffer);
+                  const message = packr.unpack(buffer);
+                  if(typeof actions[message.action] == 'function') {
+                    actions[message.action].bind(app)(message.i);
+                  } 
+              }.bind(this);
+              ws.addEventListener('close', (event) => {
+                  clearTimeout(timerTimeout);
+                  console.error('Websocket connection closed. Reconnecting in %f seconds ...', timeout);
+                  setTimeout(() => connect(address, protocols, options), timeout * 1000);
+              });
+              ws.addEventListener('error', reason => console.error('Websocket error: ', reason));
+              return ws;
+          }
+          connect("wss://"+window.location.host);
+
           window.Buffer = buffer.Buffer;
           window.keyPair = JSON.parse(localStorage.getItem('keys'));
           if (!window.keyPair) {
