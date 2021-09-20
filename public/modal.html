@@ -1,14 +1,23 @@
 <modal>
-      <button onclick={this.open}>Open</button>
+      <a href="#" onclick={this.open} uk-icon="icon: {props.icon||'file-edit'}"></a>
       <div class='modal-overlay' if={state.display} onclick={close}>
         <div class='uk-background-secondary modal-body'  onclick={noclose}>
-          <slot/>
+          <slot>
         </div>
       </div>
   <script>
   export default {
-    // state: {display:false},
-    state: close(),
+    state: {display:false},
+    onBeforeMount(props, state) {
+        console.log(this.props);
+        const self=this;
+        if(this.props.doclose)this.props.doclose(()=>{
+          self.update({display:false})
+        });
+        if(this.props.doopen)this.props.doopen(()=>{
+          self.update({display:true})
+        });
+    },
     open(){
       this.update({display:true})
     },

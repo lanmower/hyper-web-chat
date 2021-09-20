@@ -5,14 +5,14 @@
         </div>
         <div class="uk-offcanvas-bar uk-flex uk-flex-column">
             <ul class="uk-nav uk-nav-default">
-                <li><editchannel id="create-channel" emit={props.emit} channel='{{}}'></editchannel></li>
-            </ul>
-            <ul class="channels uk-nav uk-nav-default">
-                <li each="{channel in Object.entries(props.channels)}">
-                    <a onclick="{()=>{props.emit('getMessages', channel[0])}}">{channel[1].name}</a>
-                    <editchannel id="edit-channel" emit={props.emit} channel='{channel[1]}'></editchannel>
+                <li>
+                    <editchannel id="create-channel" button="Create" emit={props.emit} icon="plus" channel='{{}}'></editchannel>
                 </li>
             </ul>
+            <div each="{channel in Object.entries(props.channels)}">
+                <a onclick="{()=>{props.emit('getMessages', channel[0])}}">{channel[1].name}</a>
+                <editchannel button="Edit" id="edit-channel" emit={props.emit} channel='{channel[1]}'></editchannel>
+            </div>
         </div>
     </div>
 </channellist>

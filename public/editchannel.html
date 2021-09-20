@@ -1,5 +1,5 @@
 <editchannel>
-    <modal>
+    <modal doclose={onclose} icon="{props.icon}">
     <div class={props.id} class="uk-flex-top">
             <h2 class="uk-modal-title">Channel</h2>
             <form onsubmit="{submitHandler}">
@@ -10,10 +10,11 @@
                 <input onkeyup="{  (e)=>{edit(e, 'discordId')} }" class="uk-input uk-border-pill uk-padding-small uk-margin" type="text"
                     placeholder="Discord channel ID (optional)" value="{props.channel.discordId}" style="border: none;">
             </form>
-            <button class="uk-modal-close-default" type="button" uk-close></button>
+            <button class="uk-modal-close-default" type="button" onclick={close} uk-close></button>
             <div class="uk-text-right">
-                <button class="uk-button uk-button-default uk-modal-close" type="button">Cancel</button>
+                <button class="uk-button uk-button-default uk-modal-close" onclick={close} type="button">Cancel</button>
                 <button class="uk-button uk-button-secondary" onclick={submitHandler} type="button">Save</button>
+                <button class="uk-button uk-button-danger" onclick={removeChannel} type="button">Delete</button>
             </div>
     </div>
     </modal>
@@ -25,15 +26,29 @@
                 this.update(conf)
             },
             onBeforeMount(props, state) {
+                console.log(props);
                 this.state={
                     id: props.channel.id,
                     name: props.channel.name,
+                    buttonText: props.buttonText,
                     discordWebhook: props.channel.discordWebhook,
                     discordId: props.channel.discordId,
                 }
+                return props;
+            },
+            async onclose(e) {
+                this.close=e;
+            },
+            async onopen(e) {
+                this.open=e;
             },
             async submitHandler(e) {
                 await this.props.emit('setChannel', this.state);
+                this.props.emit('getChannels');
+            },
+            async removeChannel(e) {
+                console.log(this.props.channel.id);
+                await this.props.emit('removeChannel', this.props.channel.id);
                 this.props.emit('getChannels');
             }
         }

@@ -9,7 +9,7 @@ const socketio = global.socketio = require('socket.io');
 const http = require('http');
 const verify = require('./utils/verify');
 const action = require('./utils/action');
-const discord = require('./utils/discord')(action);
+const discord = require('./utils/discord');
 
 (async () => {
 
@@ -26,53 +26,42 @@ const discord = require('./utils/discord')(action);
   const { Webhook } = require('discord-webhook-node');
   const { WebSocketServer, OPEN } = require('ws');
   const wss = new WebSocketServer({ server });
-  wss.on('connection', function connection(ws) {
 
-    const broadcast = async (room, action, args, ws) => {
-      console.log('broadcast', action);
-      if (action == 'message') {
-        if (!args.discord && args.channel.discordWebhook) {
-          const hook = new Webhook(args.channel.discordWebhook);
-          hook.setUsername(args.name);
-          hook.setAvatar(args.avatarImage);
-          hook.send(args.body);
-        }
-        const data = packr.pack({ action, i: args });
-        wss.clients.forEach(function each(client) {
-          console.log('checking client');
-          if (client.readyState === OPEN) {
-            console.log('found');
-            if (client.rooms && client.rooms.includes(room)) {
-              console.log('sending');
-              client.send(data);
-            }
-          }
-        })
-      };
-    }
-    const emit = async (to, action, args, ws) => {
-      console.log('emit');
-      console.log(args);
-      if(action == 'join') {
-        ws.rooms = [to]
-      }
-      if (action == 'message' && args.channel.discordWebhook && !args.fromDiscord) {
+  const broadcast = async (room, action, args) => {
+    if (action == 'message') {
+      if (!args.fromDiscord && args.channel.discordWebhook) {
         const hook = new Webhook(args.channel.discordWebhook);
         hook.setUsername(args.name);
         hook.setAvatar(args.avatarImage);
         hook.send(args.body);
       }
+      const data = packr.pack({ action, i: args })
+      wss.clients.forEach(function each(client) {
+        if (client.readyState === OPEN) {
+          if (client.rooms && client.rooms.includes(room)) {
+            client.send(data);
+          }
+        }
+      })
+    };
+  }
+
+  discord(action, ()=>{}, broadcast); 
+  wss.on('connection', function connection(ws) {
+    console.log('connection')
+    
+    const emit = async (to, action, args, ws) => {
+      if(action == 'join') {
+        ws.rooms = [to]
+      }
       ws.send(packr.pack({ action, i: args }))
     };
-    console.log('connection');
     ws.on('message', async function incoming(message) {
       const start = new Date().getTime();
       const out = verify.verify(message);
-      console.log(out);
       const socketEmit = (to, type, args) => { emit(to, type, args, ws) };
       const socketBroadcast = (to, type, args) => { broadcast(to, type, args, ws) };
       const ret = await action(out, socketEmit, socketBroadcast);
-      console.log('return', ret);
       ws.send(packr.pack({ action: out.t.a, i: ret }));
     });
     ws.on('close', () => {
