@@ -9,10 +9,12 @@ window.actions = {
         this.update({name})
     },
     async getChannels(channels) {
-        console.log('channels', channels, this)
         const channelId = Object.keys(channels)[0];
         await this.update({channels, channelId});
         this.emit('getMessages', channelId); 
+    },
+    async getRoles(roles) {
+        await this.update({roles});
     },
     getMessages(input) {
         console.log({input})
@@ -26,6 +28,6 @@ window.actions = {
         if(!messages[input.channel.id]) messages[input.channel.id] = [];
         messages[input.channel.id].unshift(input);
         this.update({ messages })
-    }
+    },
 
 }    

@@ -1,28 +1,5 @@
 /* global api */
 
-async function setProfile(profile) {
-  const db = await api.getDB("profile");
-  const key = api.input.k;
-  await db.put(key, JSON.stringify(profile));
-}
-
-async function getProfile() {
-  const db = await api.getDB("profile");
-  const key = api.input.k;
-  const out = JSON.parse( (await db.get(key)) ?.value||'' );
-  return out;
-}
-
-async function getProfiles() {
-  return new Promise(async res=>{
-    const db = await api.getDB("profile");
-    const read = db.createReadStream();
-    const out = [];
-    read.on('data', data=>{ out.push(JSON.parse(data?.value)) });
-    read.on('end', ()=>{ res(out) })
-    return out;
-  })
-}
 
 async function sendMessage(input) {
   let db;
@@ -48,9 +25,9 @@ async function sendMessage(input) {
   await api.broadcast(output.channel.id, 'message', output);
 }
 
-function getMessages(channelId) {
+function getHistory(channelId, dbName) {
   return new Promise(async res=>{
-    const channel = await api.getDB(channelId.toString()+'-channel');
+    const channel = await api.getDB(dbName);
     const history = channel.createHistoryStream({limit:100});
     const out = [];
     history.on('data', (data)=>{
@@ -63,16 +40,9 @@ function getMessages(channelId) {
   }).catch(()=>{throw e})
 }
 
-async function getPermissions(channelId) {
-  const db = await api.getDB("permission");
-  const roles = JSON.parse((await db.get(Buffer.from('roles', 'utf-8')))?.value);
-  const permissions = JSON.parse((await db.get(Buffer.from(channelId, 'utf-8')))?.value);
-  return {roles,permissions};
-}
-
-async function getChannels() {
+async function getItems(input, dbName) {
   return new Promise(async res=>{
-    const db = await api.getDB("channel");
+    const db = await api.getDB(dbName);
     const read = db.createReadStream();
     const out = {};
     read.on('data', (data)=>{
@@ -84,33 +54,47 @@ async function getChannels() {
   })
 }
 
-async function removeChannel(id) {
-  console.log('remove',{id})
-  const db = await api.getDB("channel");
-  const createdAt = new Date().getTime();
-  await db.del(Buffer.from(id, 'hex')); 
+async function getItem(key, dbName) {
+  const db = await api.getDB(dbName);
+  console.log('get', key, dbName);
+  const out = JSON.parse( (await db.get(key)) ?.value||'' );
+  return out;
 }
 
-async function setChannel(input) {
-  const db = await api.getDB("channel");
+async function removeItem(id, dbName) {
+  console.log('remove',{id})
+  const db = await api.getDB(dbName);
   const createdAt = new Date().getTime();
-  var id = input.id||api.crypto.randomBytes(16).toString('hex');
-  const doc = {name:input.name, discordWebhook:input.discordWebhook, createdAt, id};
-  if(input.discordId) {
-    doc.discordId = input.discordId;
-    const discordDb = await api.getDB("discord");
-    await discordDb.put(Buffer.from(doc.discordId, 'utf-8'), JSON.stringify(doc)); 
-  }
-  await db.put(Buffer.from(id, 'hex'), JSON.stringify(doc)); 
+  return await db.del(Buffer.from(id, 'hex')); 
+}
+
+async function setItem(item, dbName) {
+  const db = await api.getDB(dbName);
+  item.createdAt = new Date().getTime();
+  item.id = item.id||api.crypto.randomBytes(16).toString('hex');
+  await db.put(Buffer.from(item.id, 'hex'), JSON.stringify(item)); 
 }
 
 const actions = { 
-  setProfile, 
-  getProfile, 
-  getProfiles, 
+  setProfile:(input)=>{input.id = api.input.k; return setItem(input, 'profile')}, 
   sendMessage, 
-  getMessages, 
-  getChannels, 
-  setChannel,
-  removeChannel
+  getProfile(input){return getItem(api.input.k, 'profile')}, 
+  getProfiles(input){return getItems(input, 'profile')}, 
+  getMessages(channelId){return getHistory(channelId, channelId.toString()+'-channel')}, 
+  getChannels(input){return getItems(input, 'channel')},
+  setChannelasync (channel){
+    const out = await setItem(channel, 'channel');
+    if(channel.discordId) {
+      doc.discordId = channel.discordId;
+      const discordDb = await api.getDB("discord");
+      await discordDb.put(Buffer.from(doc.discordId, 'utf-8'), JSON.stringify(doc)); 
+    }
+    return out;
+  },
+  getChannel(input){return getItem(input, 'channel')},
+  removeChannel(input){return removeItem(input,'channel')}, 
+  getRoles(input){return getItems(input, 'role')}, 
+  setRole(input){return setItem(input, 'role')},
+  getRole(input){return getItem(input, 'role')},
+  removeRole(input){return removeItem(input,'role')}, 
 };

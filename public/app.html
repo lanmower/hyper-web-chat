@@ -58,10 +58,10 @@
             },
             onMounted() {
                 const self = window.app = this;
-                
-                console.log('mounted', this);
                 this.emit('getChannels')
                 this.emit('getProfile')
+                //this.emit('getUsers')
+                this.emit('getRoles')
             }
         };
     </script>
