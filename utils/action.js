@@ -15,7 +15,7 @@ const actions = {
   chat: parseSrc(fs.readFileSync(`actions/chat.js`))
 };
 
-module.exports = async (input, emit, broadcast) => {
+module.exports = async (input, emit, broadcast, socketId) => {
   const time = new Date().getTime();
   const api = {getDB:db.getDB,input,crypto,time,emit, sodium, broadcast};
   vm._context.api = api;

@@ -24,6 +24,10 @@
                     <a href="#" uk-icon="icon: world;" uk-tooltip="title: browser; delay: 500"
                     uk-toggle="#terminal"></a>
                 </li>
+                <li class="uk-margin-small">
+                    <a href="#" uk-icon="icon: unlock;" uk-tooltip="title: browser; delay: 500"
+                    uk-toggle="#role-list"></a>
+                </li>
             </ul>
         </div>
         <div class="uk-navbar-right">
@@ -37,9 +41,23 @@
     <channellist channels={state.channels} emit={emit} parentUpdate={update}></channellist>
     <userlist name={state.name}></userlist>
     <terminal hash={state.channelId}></terminal>
+    <roleList roles={state.roles} emit={emit} parentUpdate={update}></roleList>
     <script>
         export default {
-            state:{messages:{}, channels:{}},
+            state:{
+                messages: {
+                    
+                },
+                channels: {
+
+                },
+                roles: {
+                    "everyone":[]
+                },
+                permissions: {
+
+                }
+            },
             actions:window.actions,
             emit(action, input='') {
                 const self = this;

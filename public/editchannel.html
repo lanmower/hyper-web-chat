@@ -9,8 +9,17 @@
                     placeholder="Webhook (optional)" value="{props.channel.discordWebhook}" style="border: none;">
                 <input onkeyup="{  (e)=>{edit(e, 'discordId')} }" class="uk-input uk-border-pill uk-padding-small uk-margin" type="text"
                     placeholder="Discord channel ID (optional)" value="{props.channel.discordId}" style="border: none;">
+                <select class="uk-select">
+                    <option value={getMessages}>Get Messages</option>
+                    <option value={getChannel}>Set Channel</option>
+                    <option value={setChannel}>Get Channel</option>
+                    <option value={removeChannel}>Remove Channel</option>
+                    <option value={getPermission}>Get Permission</option>
+                    <option value={setPermission}>Set Permission</option>
+                </select>    
             </form>
             <button class="uk-modal-close-default" type="button" onclick={close} uk-close></button>
+            
             <div class="uk-text-right">
                 <button class="uk-button uk-button-default uk-modal-close" onclick={close} type="button">Cancel</button>
                 <button class="uk-button uk-button-secondary" onclick={submitHandler} type="button">Save</button>
@@ -33,6 +42,8 @@
                     buttonText: props.buttonText,
                     discordWebhook: props.channel.discordWebhook,
                     discordId: props.channel.discordId,
+                    permissions: {
+                    }
                 }
                 return props;
             },

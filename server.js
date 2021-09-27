@@ -46,29 +46,38 @@ const discord = require('./utils/discord');
     };
   }
 
-  discord(action, ()=>{}, broadcast); 
+  discord(action, ()=>{}, broadcast);
+  const sockets = {};
   wss.on('connection', function connection(ws) {
     console.log('connection')
-    
+    const socketId = crypto.randomBytes(32).toString('hex');
+    ws.rooms = [];
+    let key = null;
     const emit = async (to, action, args, ws) => {
       if(action == 'join') {
-        ws.rooms = [to]
+        if(!ws.rooms.includes(to)) ws.rooms.push(to)
+      } else {
+        ws.send(packr.pack({ action, i: args }))
       }
-      ws.send(packr.pack({ action, i: args }))
     };
     ws.on('message', async function incoming(message) {
       const start = new Date().getTime();
       const out = verify.verify(message);
+      if(!sockets[out.k]) sockets[out.k] = [];
+      key = out.k;
+      if(!sockets[key]) sockets[key] = [];
+      sockets[key].push(socketId);
       const socketEmit = (to, type, args) => { emit(to, type, args, ws) };
+      emit(out.k, 'join', {}, ws);
       const socketBroadcast = (to, type, args) => { broadcast(to, type, args, ws) };
-      const ret = await action(out, socketEmit, socketBroadcast);
+      const ret = await action(out, socketEmit, socketBroadcast, socketId);
       ws.send(packr.pack({ action: out.t.a, i: ret }));
     });
     ws.on('close', () => {
-
+        if(sockets[key] && sockets[key].includes(socketId)) sockets[key] = sockets[key].filter(a=>a!=socketId)
     })
     ws.on('error', () => {
-
+        if(sockets[key] && sockets[key].includes(socketId)) sockets[key] = sockets[key].filter(a=>a!=socketId)
     })
   });
   const PORT = process.env.PORT || 3000;

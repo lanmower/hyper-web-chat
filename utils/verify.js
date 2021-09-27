@@ -1,6 +1,5 @@
 const packr = new Packr();
 const create = (from) => {
-    console.log(from);
     const tx = {};
     tx['action'[0]] = from.action;
     tx['input'[0]] = from.input;
@@ -19,11 +18,9 @@ const verify = (message) => {
       
       if (!verified) throw new Error("could not verify transaction");
       input['transaction'[0]] = packr.unpack(input['transaction'[0]]);
-      console.log(input.t.a);
       return input;
 };
 const sign = (input) => {
-      console.log(input);    
       const out = {};
       const tx = packr.pack(input['transaction'[0]]);
       out['transaction'[0]] = tx;

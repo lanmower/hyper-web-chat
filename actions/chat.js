@@ -82,7 +82,7 @@ const actions = {
   getProfiles(input){return getItems(input, 'profile')}, 
   getMessages(channelId){return getHistory(channelId, channelId.toString()+'-channel')}, 
   getChannels(input){return getItems(input, 'channel')},
-  setChannelasync (channel){
+  async setChannel(channel){
     const out = await setItem(channel, 'channel');
     if(channel.discordId) {
       doc.discordId = channel.discordId;
@@ -97,4 +97,8 @@ const actions = {
   setRole(input){return setItem(input, 'role')},
   getRole(input){return getItem(input, 'role')},
   removeRole(input){return removeItem(input,'role')}, 
+  getPermissions(input){return getItems(input, 'permission')}, 
+  setPermission(input){return setItem(input, 'permission')},
+  getPermission(input){return getItem(input, 'permission')},
+  removePermission(input){return removeItem(input,'permission')}, 
 };

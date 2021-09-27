@@ -6,7 +6,7 @@ let salt = process.argv.length > 1 ? process.argv[process.argv.length - 1] : nul
 if (salt == '.') salt = null;
 const key = (salt && salt.length) ? crypto.data(Buffer.from(salt)) : null;
 const keyPair = crypto.keyPair(key);
-const PORT = process.env.PORT = 8081;
+const PORT = process.env.PORT || 8081;
 var net = require("net");
 
 const createServer = (port, keyPair) => {
