@@ -39,7 +39,7 @@
     </nav>
     <messages channelId={state.channelId} messages={state.messages} emit={emit}></messages>
     <channellist channels={state.channels} emit={emit} parentUpdate={update}></channellist>
-    <userlist name={state.name}></userlist>
+    <userlist name={state.name} emit={emit}></userlist>
     <terminal hash={state.channelId}></terminal>
     <roleList roles={state.roles} emit={emit} parentUpdate={update}></roleList>
     <script>

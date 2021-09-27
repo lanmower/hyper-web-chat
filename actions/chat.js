@@ -8,7 +8,7 @@ async function sendMessage(input) {
   else  db = await api.getDB("channel");
   const channelId = Buffer.from(input.channelId, fromDiscord?'utf-8':'hex');
   if(channelId.length == 0){
-    throw Error("Cannot send a message without a channel id. Please enter a channel before sending a message.")
+    throw Error("Cannot send a message without a channel id. Please enter into a channel before sending a message.")
   } 
   const channel = JSON.parse((await db.get(channelId))?.value); 
   const messages = await api.getDB(input.channelId.toString('hex')+'-channel');
