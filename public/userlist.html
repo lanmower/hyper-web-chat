@@ -6,6 +6,7 @@
         <div class="uk-offcanvas-bar uk-flex uk-flex-column">
             <ul class="uk-nav uk-nav-primary uk-nav-center uk-margin-auto-vertical">
                 <li class="uk-active"><a href="#" id="name">{props.name}</a></li>
+                <editprofile id="edit-profile" button="Edit" emit={props.emit} profile='{{"name": props.name}}'></editprofile>
             </ul>
         </div>
     </div>

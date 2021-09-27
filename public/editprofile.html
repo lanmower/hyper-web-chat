@@ -1,0 +1,43 @@
+<editprofile>
+    <modal doclose={onclose} icon="{props.icon}">
+    <div class={props.id} class="uk-flex-top">
+            <h2 class="uk-modal-title">Profile name</h2>
+            <form onsubmit="{submitHandler}">
+                <input onkeyup="{  (e)=>{edit(e, 'name')} }" class="uk-input uk-border-pill uk-padding-small uk-margin" type="text"
+                    placeholder="New profile name" value="{props.profile.name}" style="border: none;">
+            </form>
+            <button class="uk-modal-close-default" type="button" onclick={close} uk-close></button>
+            <div class="uk-text-right">                
+                <button class="uk-button uk-button-default uk-modal-close" onclick={close} type="button">Cancel</button>
+                <button class="uk-button uk-button-secondary" onclick={submitHandler} type="button">Save</button>
+            </div>
+    </div>
+    </modal>
+    <script>
+        export default {
+            edit(e, name) {
+                const conf = {};
+                conf[name] = e.target.value;
+                this.update(conf)
+            },
+            onBeforeMount(props, state) {
+                console.log("properties in editprofile: ", props);
+                this.state={
+                    id: props.profile.id,
+                    name: props.profile.name,
+                }
+                return props;
+            },
+            async onclose(e) {
+                this.close=e;
+            },
+            async onopen(e) {
+                this.open=e;
+            },
+            async submitHandler(e) {
+                await this.props.emit('setProfile', this.state);
+                this.props.emit('getProfile');
+            },
+        }
+    </script>
+</editprofile>
