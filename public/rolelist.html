@@ -1,0 +1,18 @@
+<rolelist>
+    <div id="role-list" uk-offcanvas="overlay: true; bg-close:false; mode: none;flip:true;">
+        <div class="uk-offcanvas-bar">
+            <button class="uk-offcanvas-close" type="button" uk-close></button>
+        </div>
+        <div class="uk-offcanvas-bar uk-flex uk-flex-column">
+            <ul class="uk-nav uk-nav-default">
+                <li>
+                    <editrole id="create-role" button="Create" emit={props.emit} icon="plus" role='{{}}'>test</editrole>
+                </li>
+            </ul>
+            <div each="{role in Object.entries(props.roles)}">
+                <a onclick="{()=>{props.emit('getMessages', role[0])}}">{role[1].name}</a>
+                <editrole button="Edit" id="edit-channel" emit={props.emit} role='{role[1]}'></editrole>
+            </div>
+        </div>
+    </div>
+</rolelist>
