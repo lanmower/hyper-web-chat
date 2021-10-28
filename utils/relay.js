@@ -1,5 +1,5 @@
 const DHT = require("@hyperswarm/dht");
-const node = new DHT({});
+const node = new DHT({/*bootstrap: ['code.southcoast.ga:49737']*/});
 const crypto = require("hypercore-crypto");
 var b32 = require("hi-base32");
 let salt = process.argv.length > 1 ? process.argv[process.argv.length - 1] : null;
@@ -12,6 +12,7 @@ var net = require("net");
 const createServer = (port, keyPair) => {
     const server = node.createServer();
     server.on("connection", function (socket) {
+        console.log('connection');
         let open = { local: true, remote: true };
         var local = net.connect(port, "localhost");
         local.on('data', (d) => { socket.write(d) });

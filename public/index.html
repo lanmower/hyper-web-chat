@@ -8,44 +8,11 @@
   <script src="https://bundle.run/buffer@6.0.3"></script>
   <script src="https://unpkg.com/msgpackr@1.2.5/dist/index.js"></script>
   <script src="js/lib/nacl.js"></script>
-  <style>
-    .messagesreceived::-webkit-scrollbar-track {
-      -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
-      box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
-      border-radius: 10px;
-    }
-
-    .messagesreceived::-webkit-scrollbar {
-      width: 12px;
-    }
-
-    .messagesreceived::-webkit-scrollbar-thumb {
-      border-radius: 10px;
-      -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, .3);
-      box-shadow: inset 0 0 6px rgba(0, 0, 0, .3);
-      background-color: #555;
-    }
-
-    .messagesreceived {
-      background: #1e1e1e;
-    }
-
-    *:focus {
-      outline: none;
-    }
-
-    .messageinput {
-      color: #ccc;
-      background: #40454a;
-    }
-    </style>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uikit@3.7.2/dist/css/uikit.min.css" />
-  <script src="https://cdn.jsdelivr.net/npm/uikit@3.7.2/dist/js/uikit.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/uikit@3.7.2/dist/js/uikit-icons.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.17/tailwind-dark.min.css" />
   <!-- INSERT TAILWIND HERE §(*￣▽￣*)§ -->
 </head>
 
-<body class="uk-light uk-background-secondary uk-overflow-hidden" uk-height-viewport="expand: true">
+<body>
     <app></app>
     <!-- scripts we need -->
     <script type="riot" src="app.html"></script>
@@ -63,9 +30,6 @@
 
     <!-- mount this app -->
     <script type="module">
-      /*window.onerror = function (msg, url, line, stack, extra) {
-        UIkit.modal.dialog(`<p class="uk-modal-body uk-background-secondary">${msg}: ${line}<pre>${url} ${extra}</pre></p>`);
-      }*/
       (async()=>{
           var timeout = 10;
           function connect(address, protocols, options) {
