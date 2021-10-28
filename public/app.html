@@ -1,47 +1,16 @@
 <app>
-    <nav class="uk-navbar-container uk-navbar-transparent" uk-navbar>
-        <div class="uk-navbar-left">
-            <ul class="uk-iconnav">
-                <li class=" uk-margin-left">
-                    <a href="#" 
-                       style="margin-top:13px !important;"
-                       uk-icon="icon:list;" 
-                       uk-tooltip="name:🚪 Open; delay:500; ratio: 3.5" 
-                       uk-toggle="#channal-list"></a>
-                </li>
-                <li class="uk-margin-small">
-                    <b class="channelname">{state?.channels[state.channelId]?.name}</b>
-                </li>
-            </ul>
-        </div>
-        <div class="uk-navbar-right">
-            <ul class="uk-iconnav">
-                <li class="uk-margin-small-top">
-                    <a href="#" uk-icon="icon: users;" uk-tooltip="title:user deets; delay:500"
-                        uk-toggle="#user-list"></a>
-                </li>
-                <li class="uk-margin-small">
-                    <a href="#" uk-icon="icon: world;" uk-tooltip="title: browser; delay: 500"
-                    uk-toggle="#terminal"></a>
-                </li>
-                <li class="uk-margin-small">
-                    <a href="#" uk-icon="icon: unlock;" uk-tooltip="title: browser; delay: 500"
-                    uk-toggle="#role-list"></a>
-                </li>
-            </ul>
-        </div>
-        <div class="uk-navbar-right">
-            <ul class="uk-iconnav">
-                <li class="uk-margin-right">
-                </li>
-            </ul>
-        </div>
-    </nav>
+    <div class="fixed w-full bg-green-400 h-16 pt-2 text-white flex justify-between shadow-md" style="top:0px; overscroll-behavior: none;">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-8 h-8 my-1 text-green-100 ml-2">
+        <path class="text-green-100 fill-current" fill-rule="evenodd" d="M12 7a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm0 7a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm0 7a2 2 0 1 1 0-4 2 2 0 0 1 0 4z"></path>
+        </svg>
+        <div class="my-3 text-green-100 font-bold text-lg tracking-wide">{state?.channels[state.channelId]?.name}</div>
+      </div>
+
     <messages channelId={state.channelId} messages={state.messages} emit={emit}></messages>
-    <channellist channels={state.channels} emit={emit} parentUpdate={update}></channellist>
+    <!--channellist channels={state.channels} emit={emit} parentUpdate={update}></channellist>
     <userlist name={state.name} emit={emit}></userlist>
     <terminal hash={state.channelId}></terminal>
-    <roleList roles={state.roles} emit={emit} parentUpdate={update}></roleList>
+    <roleList roles={state.roles} emit={emit} parentUpdate={update}></roleList-->
     <script>
         export default {
             state:{
