@@ -31,7 +31,7 @@ async function sendMessage(input) {
 function getHistory(channelId, dbName) {
   return new Promise(async res=>{
     const channel = await api.getDB(dbName);
-    const history = channel.createHistoryStream({limit:100});
+    const history = channel.createReadStream({limit:100});
     const out = [];
     history.on('data', (data)=>{
       out.push(JSON.parse(data?.value));
