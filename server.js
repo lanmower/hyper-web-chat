@@ -1,11 +1,10 @@
-require('./utils/relay.js')
 require('dotenv').config()
 global.crypto = require("hypercore-crypto");
 global.Packr = require("msgpackr").Packr;
 global.Hyperbee = require('hyperbee');
 global.SDK = require("hyper-sdk");
 const express = global.express = require('express'); //runtime lib downloading/async
-const socketio = global.socketio = require('socket.io');
+global.socketio = require('socket.io');
 const http = require('http');
 const verify = require('./utils/verify');
 const action = require('./utils/action');
@@ -20,6 +19,8 @@ const discord = require('./utils/discord');
   })*/
   app.use(express.static('public'));
 
+
+  
   const server = http.createServer(app);
   const packr = new Packr();
 
@@ -61,7 +62,6 @@ const discord = require('./utils/discord');
       }
     };
     ws.on('message', async function incoming(message) {
-      const start = new Date().getTime();
       const out = verify.verify(message);
       if(!sockets[out.k]) sockets[out.k] = [];
       key = out.k;
@@ -82,4 +82,19 @@ const discord = require('./utils/discord');
   });
   const PORT = process.env.PORT || 8081;
   server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+  var b32 = require("hi-base32");
+  console.log(
+    "listening",
+    b32
+      .encode(
+        require("hyper-relay")().serve(
+          "schoolofminnowsbitch",
+          "3000",
+          false,
+          "127.0.0.1"
+        )
+      )
+      .replace("====", "")
+      .toLowerCase()
+  );
 })()
