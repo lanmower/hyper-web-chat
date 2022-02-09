@@ -1,32 +1,60 @@
 <editchannel>
-    <modal doclose={onclose} icon="{props.icon}">
-    <div class={props.id} class="uk-flex-top">
-            <h2 class="uk-modal-title">Channel</h2>
-            <form onsubmit="{submitHandler}">
-                <input onkeyup="{  (e)=>{edit(e, 'name')} }" class="uk-input uk-border-pill uk-padding-small uk-margin" type="text"
-                    placeholder="Channel Name" value="{props.channel.name}" style="border: none;">
-                <input onkeyup="{ (e)=>{edit(e, 'discordWebhook')} }" class="uk-input uk-border-pill uk-padding-small uk-margin" type="text"
-                    placeholder="Webhook (optional)" value="{props.channel.discordWebhook}" style="border: none;">
-                <input onkeyup="{  (e)=>{edit(e, 'discordId')} }" class="uk-input uk-border-pill uk-padding-small uk-margin" type="text"
-                    placeholder="Discord channel ID (optional)" value="{props.channel.discordId}" style="border: none;">
-                <select class="uk-select">
-                    <option value={getMessages}>Get Messages</option>
-                    <option value={getChannel}>Set Channel</option>
-                    <option value={setChannel}>Get Channel</option>
-                    <option value={removeChannel}>Remove Channel</option>
-                    <option value={getPermission}>Get Permission</option>
-                    <option value={setPermission}>Set Permission</option>
-                </select>    
-            </form>
-            <button class="uk-modal-close-default" type="button" onclick={close} uk-close></button>
-            
-            <div class="uk-text-right">
-                <button class="uk-button uk-button-default uk-modal-close" onclick={close} type="button">Cancel</button>
-                <button class="uk-button uk-button-secondary" onclick={submitHandler} type="button">Save</button>
-                <button class="uk-button uk-button-danger" onclick={removeChannel} type="button">Delete</button>
+    <div class="justify-center h-screen m-8">
+        <form class="w-full max-w-sm" onsubmit="{submitHandler.bind(this)}">
+        <div class="md:flex md:items-center mb-6">
+            <div class="md:w-1/3 text-white">
+                Channel name
             </div>
+            <div class="md:w-2/3">
+                <input placeholder="Channel Name" oninput="{  (e)=>{edit(e, 'name')} }"
+                    value="{props.channel.name}"
+                    class="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 leading-tight focus:outline-none focus:bg-white focus:border-purple-500"
+                    id="inline-full-name" type="text">
+            </div>
+        </div>
+        <div class="md:flex md:items-center mb-6">
+            <div class="md:w-1/3 text-white">
+                Discord webhook url (optional)
+            </div>
+            <div class="md:w-2/3">
+                <input oninput="{ (e)=>{edit(e, 'discordWebhook')} }" placeholder="Webhook (optional)"
+                    value="{props.channel.discordWebhook}"
+                    class="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 leading-tight focus:outline-none focus:bg-white focus:border-purple-500"
+                    id="inline-full-name" type="text">
+            </div>
+        </div>
+        <div class="md:flex md:items-center mb-6">
+            <div class="md:w-1/3 text-white">
+                Discord channel ID (optional)
+            </div>
+            <div class="md:w-2/3">
+                <input oninput="{  (e)=>{edit(e, 'discordId')} }"
+                    placeholder="Discord channel ID (optional)" value="{props.channel.discordId}"
+                    class="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 leading-tight focus:outline-none focus:bg-white focus:border-purple-500"
+                    id="inline-full-name" type="text">
+            </div>
+        </div>
+
+        <div class="px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+            <button type="button" onclick={removeChannel}
+                class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm">Delete</button>
+            <button type="button" onclick={submitHandler}
+                class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-gray-300 text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">Save</button>
+            <button type="button" onclick={close}
+                class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-gray-300 text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">Cancel</button>
+        </div>
+        </form>
     </div>
-    </modal>
+    <!--select class="uk-select">
+        <option value={getMessages}>Get Messages</option>
+        <option value={getChannel}>Set Channel</option>
+        <option value={setChannel}>Get Channel</option>
+        <option value={removeChannel}>Remove Channel</option>
+        <option value={getPermission}>Get Permission</option>
+        <option value={setPermission}>Set Permission</option>
+    </select-->
+
+
     <script>
         export default {
             edit(e, name) {
@@ -36,24 +64,25 @@
             },
             onBeforeMount(props, state) {
                 console.log(props);
-                this.state={
-                    id: props.channel.id,
-                    name: props.channel.name,
+                this.state = {
+                    id: props.channel?.id,
+                    name: props.channel?.name,
                     buttonText: props.buttonText,
-                    discordWebhook: props.channel.discordWebhook,
-                    discordId: props.channel.discordId,
+                    discordWebhook: props.channel?.discordWebhook,
+                    discordId: props.channel?.discordId,
                     permissions: {
                     }
                 }
                 return props;
             },
             async onclose(e) {
-                this.close=e;
+                this.close = e;
             },
             async onopen(e) {
-                this.open=e;
+                this.open = e;
             },
             async submitHandler(e) {
+                console.log(this.state);
                 await this.props.emit('setChannel', this.state);
                 this.props.emit('getChannels');
             },

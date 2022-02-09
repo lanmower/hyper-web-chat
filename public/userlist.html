@@ -1,13 +1,16 @@
 <userlist>
-    <div id="user-list" uk-offcanvas="overlay: true; bg-close:false; mode: none;flip:true;">
-        <div class="uk-offcanvas-bar">
-            <button class="uk-offcanvas-close" type="button" uk-close></button>
-        </div>
-        <div class="uk-offcanvas-bar uk-flex uk-flex-column">
-            <ul class="uk-nav uk-nav-primary uk-nav-center uk-margin-auto-vertical">
-                <li class="uk-active"><a href="#" id="name">{props.name}</a></li>
-                <editprofile id="edit-profile" button="Edit" emit={props.emit} profile='{{"name": props.name}}'></editprofile>
-            </ul>
-        </div>
+    <div class="sidebar-users text-sm bg-gray-800 w-56 flex-none px-3 py-3 overflow-y-auto">
+        <h3 class="uppercase tracking-wide font-semibold text-xs text-gray-500 mb-2">Users — {props.users.length}</h3>
+        <ul class="mb-6 truncate">
+            <li each={user in props.users} class="text-gray-500 px-2 hover:text-gray-200 hover:bg-gray-750 py-1 my-2"><a
+                    href="#" class="flex items-center"><span class="flex-none"><a href="#"><img if="{user.avatar}"
+                                src="{user.avatar}" alt="avatar" class="w-8 h-8 rounded-full"></a></span>
+                    <div class="ml-2">
+                        <div>{user.name}</div>
+                        <div class="text-xxs text-gray-600">Playing <span class="font-bold">Visual
+                                Studio Code</span></div>
+                    </div>
+                </a></li>
+        </ul>
     </div>
 </userlist>

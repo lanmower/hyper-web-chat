@@ -1,32 +1,40 @@
 <messages>
-
-    <div class="mt-20 mb-16">
-        <div>
-            <div  each="{ message in props.messages[props.channelId] }" class="clearfix">
-                <div class="bg-gray-300 w-3/4 mx-4 my-2 p-2 rounded-lg"><b>{message?message.name:''}</b><span>{window.moment(message.time).fromNow()}</span><div>{message.body}</div></div>
-            </div>
+    <div each="{ message in props.messages[props.channelId] }"
+        class="flex mx-6 my-3 py-4 border-t border-gray-700">
+        <div class="flex-none "><button><img class="w-10 h-10 rounded-full"
+                    src="{message.avatar||`https://avatars.dicebear.com/api/pixel-art-neutral/${message.name}.svg`}" alt="avatar"></button>
         </div>
-        <div class="absolute inset-x-0 bottom-0" style="overscroll-behavior: none;">
-            <form class="messagessend">
-                <textarea class="messageinput flex-grow m-2 py-2 px-4 mr-1 rounded-full border border-gray-300 bg-gray-200 resize-none" rows="1" placeholder="Message..." style="outline: none;"></textarea>
-                <button onclick={sendMessage} class="m-2" style="outline: none;">
-                    <svg class="svg-inline--fa text-green-400 fa-paper-plane fa-w-16 w-12 h-12 py-2 mr-2" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="paper-plane" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-                    <path fill="currentColor" d="M476 3.2L12.5 270.6c-18.1 10.4-15.8 35.6 2.2 43.2L121 358.4l287.3-253.2c5.5-4.9 13.3 2.6 8.6 8.3L176 407v80.5c0 23.6 28.5 32.9 42.5 15.8L282 426l124.6 52.2c14.2 6 30.4-2.9 33-18.2l72-432C515 7.8 493.3-6.8 476 3.2z"></path>
-                    </svg>
-                </button>
-            </form>
+        <div class="ml-5">
+            <div><button class="text-white hover:underline">{message?message.name:''}</button><span
+                    class="text-xs text-gray-600 ml-1">{window.moment(message.time).fromNow()}</span></div>
+            <div>
+                {message.body}
+            </div>
+            <div if={message.images}>
+                <section class="overflow-hidden text-gray-700">
+                    <div class="container px-5 py-2 mx-auto lg:pt-24 lg:px-32">
+                      <div class="flex flex-wrap -m-1 md:-m-2">
+                        <div class="flex flex-wrap w-1/2">
+                          <div each={image in Object.values(message.images)}class="w-1/2 p-1 md:p-2">
+                            <img alt="gallery" class="block object-cover object-center w-full h-full rounded-lg"
+                              src="{image.url}">
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </section>
+            </div>
+
         </div>
     </div>
     <script>
         export default {
-            sendMessage(e) {
-                e.preventDefault();
-                const body = e.target.elements[0].value;
-                console.log('sending', body);
-                this.props.emit('sendMessage', { body, channelId: this.props.channelId });
-                e.target.elements[0].value = '';
-                e.target.elements[0].focus();
-            }
+
+            onUpdated() {
+                console.log(this.state);
+            },
         }
+
     </script>
-</messages> 
+
+</messages>

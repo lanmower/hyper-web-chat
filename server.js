@@ -9,18 +9,13 @@ const http = require('http');
 const verify = require('./utils/verify');
 const action = require('./utils/action');
 const discord = require('./utils/discord');
-
+const fs = require('fs');
 (async () => {
 
   const app = express();
-  /*app.use(function (req, res, next) {
-    res.set('Cache-control', 'public, max-age=300')
-    next();
-  })*/
+
   app.use(express.static('public'));
 
-
-  
   const server = http.createServer(app);
   const packr = new Packr();
 
@@ -33,7 +28,10 @@ const discord = require('./utils/discord');
       if (!args.fromDiscord && args.channel.discordWebhook) {
         const hook = new Webhook(args.channel.discordWebhook);
         hook.setUsername(args.name);
-        hook.setAvatar(args.avatarImage);
+        const avatar = args.avatar||`https://avatars.dicebear.com/api/pixel-art-neutral/${args.name}.png`;
+        console.log({avatar, args})
+        hook.setAvatar(avatar);
+        console.log(args);
         hook.send(args.body);
       }
       const data = packr.pack({ action, i: args })
@@ -61,17 +59,35 @@ const discord = require('./utils/discord');
         ws.send(packr.pack({ action, i: args }))
       }
     };
+    var debounce = require('debounce');
+    /*fs.watch('public', debounce((eventType, filename) => {
+      const data = packr.pack({ action: 'refresh', i: {} })
+      wss.clients.forEach(function each(client) {
+        if (client.readyState === OPEN) {
+          client.send(data);
+        }
+        client.close();
+      })
+      }, 1000));*/
+
+
     ws.on('message', async function incoming(message) {
-      const out = verify.verify(message);
-      if(!sockets[out.k]) sockets[out.k] = [];
-      key = out.k;
-      if(!sockets[key]) sockets[key] = [];
-      sockets[key].push(socketId);
-      const socketEmit = (to, type, args) => { emit(to, type, args, ws) };
-      emit(out.k, 'join', {}, ws);
-      const socketBroadcast = (to, type, args) => { broadcast(to, type, args, ws) };
-      const ret = await action(out, socketEmit, socketBroadcast, socketId);
-      ws.send(packr.pack({ action: out.t.a, i: ret }));
+      try {
+        const out = verify.verify(message);
+        if(!out.t || !out.k) return false;
+        if(!sockets[out.k]) sockets[out.k] = [];
+        key = out.k;
+        if(!sockets[key]) sockets[key] = [];
+        sockets[key].push(socketId);
+        const socketEmit = (to, type, args) => { emit(to, type, args, ws) };
+        emit(out.k, 'join', {}, ws);
+        const socketBroadcast = (to, type, args) => { broadcast(to, type, args, ws) };
+        const ret = await action(out, socketEmit, socketBroadcast, socketId);
+
+        await ws.send(packr.pack({ action: out.t.a, i: ret }));
+      } catch(e) {
+        console.trace(e);
+      }
     });
     ws.on('close', () => {
         if(sockets[key] && sockets[key].includes(socketId)) sockets[key] = sockets[key].filter(a=>a!=socketId)
@@ -80,7 +96,8 @@ const discord = require('./utils/discord');
         if(sockets[key] && sockets[key].includes(socketId)) sockets[key] = sockets[key].filter(a=>a!=socketId)
     })
   });
-  const PORT = process.env.PORT || 8081;
+
+  const PORT = process.env.PORT || 3000;
   server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
   var b32 = require("hi-base32");
   console.log(
@@ -88,8 +105,22 @@ const discord = require('./utils/discord');
     b32
       .encode(
         require("hyper-relay")().serve(
-          "schoolofminnowsbitch",
+          "chatbitch",
           "3000",
+          false,
+          "127.0.0.1"
+        )
+      )
+      .replace("====", "")
+      .toLowerCase()
+  );
+  console.log(
+    "listening",
+    b32
+      .encode(
+        require("hyper-relay")().serve(
+          "chatbitch-liverload",
+          "35729",
           false,
           "127.0.0.1"
         )

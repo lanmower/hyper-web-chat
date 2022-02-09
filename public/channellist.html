@@ -1,18 +1,34 @@
 <channellist>
-    <div id="channal-list" uk-offcanvas="overlay: false; bg-close:false; mode: push">
-        <div class="uk-offcanvas-bar">
-            <button class="uk-offcanvas-close" type="button" uk-close></button>
-        </div>
-        <div class="uk-offcanvas-bar uk-flex uk-flex-column">
-            <ul class="uk-nav uk-nav-default">
-                <li>
-                    <editchannel id="create-channel" button="Create" emit={props.emit} icon="plus" channel='{{}}'></editchannel>
-                </li>
-            </ul>
-            <div each="{channel in Object.entries(props.channels)}">
-                <a onclick="{()=>{props.emit('getMessages', channel[0])}}">{channel[1].name}</a>
-                <editchannel button="Edit" id="edit-channel" emit={props.emit} channel='{channel[1]}'></editchannel>
-            </div>
-        </div>
+    <div class="hashtag-bar text-sm leading-relaxed overflow-y-auto">
+        <ul class="px-2 py-3">
+            <li each="{channel in Object.entries(props.channels)}"
+                class="text-gray-500 px-2 hover:text-gray-200 hover:bg-gray-900 flex">
+                <a onclick="{()=>{props.emit('getMessages', channel[0])}}" href="#" class="flex items-center w-full">
+                    <span class="text-xl">#</span>
+                    <span class="ml-2">{channel[1].name}</span>
+                </a>
+                <div class="">
+                    <a href="#/editchannel/{channel[0]}" class="mt-2 hover:text-white float-right">
+                        <svg fill="currentColor" width="24" height="24"
+                            viewBox="0 0 24 24" class="w-3 h-3">
+                            <path d="M0 0h24v24H0z" fill="none"></path>
+                            <path
+                                d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z">
+                            </path>
+                        </svg>
+                    </a>
+                </div>
+            </li>
+        </ul>
+        <!--button class="flex items-center text-gray-500 hover:text-gray-200"><svg
+                fill="currentColor" viewBox="0 0 24 24" width="24" height="24">
+                <path
+                    d="M15.3 9.3a1 1 0 0 1 1.4 1.4l-4 4a1 1 0 0 1-1.4 0l-4-4a1 1 0 0 1 1.4-1.4l3.3 3.29 3.3-3.3z"
+                    class="heroicon-ui"></path>
+            </svg>
+            <h3 class="uppercase tracking-wide font-semibold text-xs">Tailwind CSS</h3>
+        </button-->
     </div>
+
+
 </channellist>

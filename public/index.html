@@ -8,71 +8,81 @@
   <script src="https://bundle.run/buffer@6.0.3"></script>
   <script src="https://unpkg.com/msgpackr@1.2.5/dist/index.js"></script>
   <script src="https://unpkg.com/tweetnacl@1.0.3/nacl.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" />
+  <script src="https://cdn.jsdelivr.net/npm/tw-elements/dist/js/index.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tw-elements/dist/css/index.min.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.17/tailwind-dark.min.css" />
+
 </head>
 
-<body>
-    <app></app>
-    <script type="riot" src="app.html"></script>
-    <script type="riot" src="editrole.html"></script>
-    <script type="riot" src="rolelist.html"></script>
-    <script type="riot" src="editchannel.html"></script>
-    <script type="riot" src="channellist.html"></script>
-    <script type="riot" src="userlist.html"></script>
-    <script type="riot" src="terminal.html"></script>
-    <script type="riot" src="messages.html"></script>
-    <script type="riot" src="modal.html"></script>
-    <script type="riot" src="editprofile.html"></script>
-    <script src="https://unpkg.com/riot@6/riot+compiler.min.js"></script>
-    <script src="https://unpkg.com/@riotjs/route/route.js"></script>
+<body class="dark">
+  <app></app>
+  <!-- scripts we need -->
+  <script type="riot" src="app.html"></script>
+  <script type="riot" src="editrole.html"></script>
+  <script type="riot" src="rolelist.html"></script>
+  <script type="riot" src="editchannel.html"></script>
+  <script type="riot" src="channellist.html"></script>
+  <script type="riot" src="userlist.html"></script>
+  <script type="riot" src="terminal.html"></script>
+  <script type="riot" src="messages.html"></script>
+  <script type="riot" src="sendmessage.html"></script>
+  <script type="riot" src="config.html"></script>
+  <script type="riot" src="navbar.html"></script>
+  <script type="riot" src="editprofile.html"></script>
+  <script src="https://unpkg.com/riot@6/riot+compiler.min.js"></script>
+  <script src="https://unpkg.com/@riotjs/route/route.js"></script>
+  <style>
+    body {
+      background-color: #3f495a;
+    }
+  </style>
+  <!-- mount this app -->
+  <script type="module">
+    (async () => {
 
-    <!-- mount this app -->
-    <script type="module">
-      (async()=>{
-          var timeout = 10;
-          function connect(address, protocols, options) {
-              let ws = window.socket = new WebSocket(address, protocols, options);
-              let timerTimeout = setTimeout(() => ws.close(), timeout * 1000); // force close unless cleared on 'open'
-              ws.addEventListener('open', (event) => {
-                  console.log('Opened. Clearing timeout ...');
-                  clearTimeout(timerTimeout);
-              });
-              ws.onmessage = async function (event) {
-                  var arrayBuffer = await event.data.arrayBuffer();
-                  var buffer = Buffer.from(arrayBuffer);
-                  const message = packr.unpack(buffer);
-                  if(typeof actions[message.action] == 'function') {
-                    actions[message.action].bind(app)(message.i);
-                  } 
-              }.bind(this);
-              ws.addEventListener('close', (event) => {
-                  clearTimeout(timerTimeout);
-                  console.error('Websocket connection closed. Reconnecting in %f seconds ...', timeout);
-                  setTimeout(() => connect(address, protocols, options), timeout * 1000);
-              });
-              ws.addEventListener('error', reason => console.error('Websocket error: ', reason));
-              return ws;
+      //router.push(window.location.hash.replace('#', ''))
+      var timeout = 10;
+      function connect(address, protocols, options) {
+        let ws = window.socket = new WebSocket(address, protocols, options);
+        let timerTimeout = setTimeout(() => ws.close(), timeout * 1000); // force close unless cleared on 'open'
+        ws.addEventListener('open', (event) => {
+          console.log('Opened. Clearing timeout ...');
+          clearTimeout(timerTimeout);
+        });
+        ws.onmessage = async function (event) {
+          var arrayBuffer = await event.data.arrayBuffer();
+          var buffer = Buffer.from(arrayBuffer);
+          const message = packr.unpack(buffer);
+          if (typeof actions[message.action] == 'function') {
+            actions[message.action].bind(app)(message.i);
           }
-          connect("wss://"+window.location.host);
-
-          window.Buffer = buffer.Buffer;
-          window.keyPair = JSON.parse(localStorage.getItem('keys'));
-          if (!window.keyPair) {
-              window.keyPair = nacl.sign.keyPair();
-              const save = { publicKey: Buffer.from(window.keyPair.publicKey).toString('hex'), secretKey: Buffer.from(window.keyPair.secretKey).toString('hex') };
-              localStorage.setItem('keys', JSON.stringify(save));
-              console.log('saved');
-          } else {
-              window.keyPair.secretKey = Buffer.from(window.keyPair.secretKey, 'hex');
-              window.keyPair.publicKey = Buffer.from(window.keyPair.publicKey, 'hex');
-          }
-        riot.register('router', route.Router)
-        riot.register('route', route.Route)
-        await riot.compile();
-        riot.mount("app");
-      })();
-    </script>
-
+        }.bind(this);
+        ws.addEventListener('close', (event) => {
+          clearTimeout(timerTimeout);
+          console.error('Websocket connection closed. Reconnecting in %f seconds ...', timeout);
+          setTimeout(() => connect(address, protocols, options), timeout * 1000);
+        });
+        ws.addEventListener('error', reason => console.error('Websocket error: ', reason));
+        return ws;
+      }
+      connect("wss://" + window.location.host);
+      window.Buffer = buffer.Buffer;
+      window.keyPair = JSON.parse(localStorage.getItem('keys'));
+      if (!window.keyPair) {
+        window.keyPair = nacl.sign.keyPair();
+        const save = { publicKey: Buffer.from(window.keyPair.publicKey).toString('hex'), secretKey: Buffer.from(window.keyPair.secretKey).toString('hex') };
+        localStorage.setItem('keys', JSON.stringify(save));
+        console.log('saved');
+      } else {
+        window.keyPair.secretKey = Buffer.from(window.keyPair.secretKey, 'hex');
+        window.keyPair.publicKey = Buffer.from(window.keyPair.publicKey, 'hex');
+      }
+      await riot.compile();
+      riot.mount("app");
+    })();
+  </script>
   <script src="js/actions.js"></script>
   <script src="js/signer.js"></script>
 </body>
