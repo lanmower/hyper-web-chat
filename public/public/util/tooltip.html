@@ -1,0 +1,38 @@
+<tooltip>
+  <span aria-describedby="tooltip"><slot/></span>
+  <div  role="tooltip" class="tip" style="background: #333; color: white; font-weight: bold; padding: 4px 8px; font-size: 13px; border-radius: 4px">{props.title}</div>
+  <script>
+    export default {
+      onMounted() {
+        const ref = this.$('span');
+        const tipel = this.$('.tip');
+        const tooltip = this.tooltip = Popper.createPopper(ref, tipel);
+        
+        function show() {
+            tipel.setAttribute('data-show', '');
+            tooltip.update();
+        }
+
+        function hide() {
+            tipel.removeAttribute('data-show');
+        }
+
+        const showEvents = ['mouseenter', 'focus'];
+        const hideEvents = ['mouseleave', 'blur'];
+
+        showEvents.forEach((event) => {
+            ref.addEventListener(event, show);
+        });
+
+        hideEvents.forEach((event) => {
+            ref.addEventListener(event, hide);
+        });
+        console.log(this.tooltip);
+      },
+      onBeforeUnmount() {
+        this.tooltip.destroy();
+      }
+
+    };
+  </script>
+</tooltip>

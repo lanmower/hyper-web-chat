@@ -1,0 +1,68 @@
+<messages>
+  <messageslayout
+    app="{props.app}"
+  >
+    <div class="overflow-y-auto chat text-sm text-gray-400">
+      <div
+        each="{ message in (this.props?.app?.messages[this.props?.app?.channelId]||[]) }"
+        class="flex mx-6 my-3 py-4 border-t border-gray-700"
+      > 
+        <div class="flex-none">
+          <button>
+            <img
+              class="w-10 h-10 rounded-full"
+              src="{message.avatar||`https://avatars.dicebear.com/api/pixel-art-neutral/${message.name}.svg`}"
+              alt="avatar"
+            />
+          </button>
+        </div>
+        <div class="ml-5">
+          <div>
+            <button class="text-white hover:underline">
+              {message?message.name:''}
+            </button>
+            <span class="text-xs text-gray-600 ml-1">
+              {window.moment(message.time).fromNow()}
+            </span>
+          </div>
+          <div>{message.body}</div>
+          <div if="{message.images&&Object.values(message.images).length}">
+            <section class="overflow-hidden text-gray-700">
+              <div class="container px-5 py-2 mx-auto lg:pt-4">
+                <div class="flex flex-wrap -m-1 md:-m-2">
+                  <div class="flex flex-wrap w-1/2">
+                    <div
+                      each="{image in Object.values(message.images)}"
+                      class="w-1/2 p-1 md:p-2"
+                    >
+                      <img
+                        alt="gallery"
+                        class="block object-cover object-center w-full h-full rounded-lg"
+                        src="{image.url}"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+    </div>
+    <sendmessage
+      app="{props.app}"
+    ></sendmessage>
+  </messageslayout>
+  <script>
+    export default {
+      onMounted() {
+        const chat = this.$(".chat");
+        chat.scrollTop = chat.scrollHeight;
+      },
+      onUpdated() {
+        const chat = this.$(".chat");
+        chat.scrollTop = chat.scrollHeight;
+      }
+    };
+  </script>
+</messages>

@@ -1,0 +1,67 @@
+
+
+<serverroles>
+  <serverlayout title="server roles">
+  
+
+    <div class="md:flex md:items-center mb-6">
+        <div class="md:w-1/3 ">
+            role
+        </div>
+        <div class="md:w-2/3">
+            <input placeholder="Name" oninput="{  (e)=>{edit(e, 'name')} }"
+                value="{state.newrole}"
+                class="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 leading-tight focus:outline-none focus:bg-white focus:border-purple-500 text-gray-500"
+                id="inline-full-name" type="text">
+        </div>
+        <button type="button" onclick={addRole} class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-gray-600 text-base font-medium text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 sm:ml-3 sm:w-auto sm:text-sm">Add</button>
+    </div>
+    <div class="flex justify-center">
+        <div class="bg-gray-800 
+        rounded-lg w-96">
+
+          <a
+          each={ role in Object.entries(props.app.roles) }
+          href="#/server/role/{role[0]}"
+            class="
+              block
+              px-6
+              py-2
+              w-full
+              hover:bg-blue-600 hover:text-gray-200
+              focus:outline-none focus:ring-0 focus:bg-gray-200 focus:text-gray-600
+              transition
+              duration-500
+              cursor-pointer
+              rounded-lg
+            "
+          >
+            {role[1].name}
+          </a>
+          
+        </div>
+      </div>
+
+    </serverlayout>
+      <script>
+        export default {
+            edit(e, name) {
+                const conf = {};
+                conf[name] = e.target.value;
+                this.update(conf)
+            },
+            onBeforeMount(props, state) {
+                this.state={}
+                return props;
+            },
+            async addRole(e) {
+                await this.props.app?.emit('setRole', this.state);
+                this.props.app?.emit('findRole');
+            },
+            async removeRole(e) {
+                await this.props.app?.emit('removeRole', props.route.params.roleId);
+                this.props.app?.emit('findRole');
+            },
+        }
+    </script>
+</serverroles>

@@ -1,0 +1,174 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chat Server</title>
+    <script src="https://unpkg.com/moment@2.29.1/min/moment.min.js"></script>
+    <script src="https://bundle.run/buffer@6.0.3"></script>
+    <script src="https://unpkg.com/msgpackr@1.2.5/dist/index.js"></script>
+    <script src="https://unpkg.com/tweetnacl@1.0.3/nacl.min.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/tw-elements/dist/js/index.min.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/tw-elements/dist/css/index.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.17/tailwind-dark.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/codemirror.min.css"
+    />
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/mode/markdown/markdown.min.js"></script>
+    <script src="https://unpkg.com/@popperjs/core@2" charset="utf-8"></script>
+    <style>
+      .tip {
+        display: none;
+      }
+      .tip[data-show] {
+        display: block;
+      }
+    </style>
+  </head>
+
+  <body class="dark text-white">
+    <app></app>
+    <!-- scripts we need -->
+    <script type="riot" src="app.html"></script>
+    <script type="riot" src="layout/userhud.html"></script>
+    <script type="riot" src="layout/navbar.html"></script>
+    <script type="riot" src="layout/userlist.html"></script>
+    <script type="riot" src="layout/editor.html"></script>
+    <script type="riot" src="messages/sendmessage.html"></script>
+    <script type="riot" src="messages/messages.html"></script>
+    <script type="riot" src="messages/messageslayout.html"></script>
+    <script type="riot" src="channel/channellist.html"></script>
+    <script type="riot" src="channel/channelprofile.html"></script>
+    <script type="riot" src="channel/channelrole.html"></script>
+    <script type="riot" src="channel/channelroles.html"></script>
+    <script type="riot" src="channel/channellayout.html"></script>
+    <script type="riot" src="server/serverlayout.html"></script>
+    <script type="riot" src="server/serverprofile.html"></script>
+    <script type="riot" src="server/serverroles.html"></script>
+    <script type="riot" src="server/serverrole.html"></script>
+    <script type="riot" src="user/userprofile.html"></script>
+    <script type="riot" src="util/tooltip.html"></script>
+    <script type="riot" src="util/modal.html"></script>
+    <script src="https://unpkg.com/riot@6/riot+compiler.min.js"></script>
+    <script src="https://unpkg.com/@riotjs/route/route.js"></script>
+
+    <style>
+      body {
+        background-color: #3f495a;
+      }
+    </style>
+    <!-- mount this app -->
+    <script type="module">
+      (async () => {
+        //router.push(window.location.hash.replace('#', ''))
+        var timeout = 10;
+        function connect(address, protocols, options) {
+          let ws = (window.socket = new WebSocket(address, protocols, options));
+          let timerTimeout = setTimeout(() => ws.close(), timeout * 1000); // force close unless cleared on 'open'
+          ws.addEventListener("open", (event) => {
+            console.log("Opened. Clearing timeout ...");
+            clearTimeout(timerTimeout);
+          });
+          ws.onmessage = async function (event) {
+            var arrayBuffer = await event.data.arrayBuffer();
+            var buffer = Buffer.from(arrayBuffer);
+            const message = packr.unpack(buffer);
+            console.log("MESSAGE", message, window.hooks);
+            if (typeof actions[message.action] == "function") {
+              console.log(message.p);
+              actions[message.action].bind(app)(message.p);
+            }
+            if (typeof window.hooks[message.i] == "function") {
+              window.hooks[message.i].bind(app)(message.p);
+            }
+          }.bind(this);
+          ws.addEventListener("close", (event) => {
+            clearTimeout(timerTimeout);
+            console.error(
+              "Websocket connection closed. Reconnecting in %f seconds ...",
+              timeout
+            );
+            setTimeout(
+              () => connect(address, protocols, options),
+              timeout * 1000
+            );
+          });
+          const uuidv4 = ()=> {
+            return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+              (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+            );
+          }
+          window.emit = (action, parameters = "") => {
+            return new Promise((res) => {
+              const socket = window.socket;
+              
+              const id = uuidv4();
+              if (socket && socket.readyState === WebSocket.CONNECTING) {
+                console.log("not connected, waiting");
+                socket.addEventListener("open", (event) => {
+                  console.log("socket open");
+                  socket.send(sign({ action, parameters, keyPair, id }));
+                });
+              } else if (socket && socket.readyState === WebSocket.OPEN) {
+                socket.send(sign({ action, parameters, keyPair, id }));
+              }
+              window.hooks[id] = (out) => {
+                console.log("returning promise for", id, out);
+                res(out);
+                delete window.hooks[id];
+              };
+              setTimeout(() => {
+                return window.hooks[id];
+              }, 10000);
+            });
+          };
+          ws.addEventListener("error", (reason) =>
+            console.error("Websocket error: ", reason)
+          );
+          return ws;
+        }
+        connect("wss://" + window.location.host);
+        window.Buffer = buffer.Buffer;
+        window.keyPair = JSON.parse(localStorage.getItem("keys"));
+        if (!window.keyPair) {
+          window.keyPair = nacl.sign.keyPair();
+          const save = {
+            publicKey: Buffer.from(window.keyPair.publicKey).toString("hex"),
+            secretKey: Buffer.from(window.keyPair.secretKey).toString("hex"),
+          };
+          localStorage.setItem("keys", JSON.stringify(save));
+          console.log("saved");
+        } else {
+          window.keyPair.secretKey = Buffer.from(
+            window.keyPair.secretKey,
+            "hex"
+          );
+          window.keyPair.publicKey = Buffer.from(
+            window.keyPair.publicKey,
+            "hex"
+          );
+        }
+        await riot.compile();
+        riot.mount("app");
+      })();
+    </script>
+    <script src="js/actions.js"></script>
+    <script src="js/signer.js"></script>
+  </body>
+</html>

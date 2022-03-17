@@ -1,0 +1,56 @@
+
+
+<channelrole>
+    <channellayout channels={props.app.channels} route={props.route}  title="permission details " description="{state?.name}">
+        <div class="justify-center h-screen m-8"  if={props.route.params.channelId}>
+            <form onsubmit="{submitHandler}">
+                <div class="form-check form-switch mx-8 p-2">
+                    <label class="form-check-label inline-block text-gray-300" for="flexSwitchCheckDefault">update channel profile</label>
+                    <input class="form-check-input appearance-none mx-4 w-9 -ml-10 rounded-full float-left h-5 align-top bg-white bg-no-repeat bg-contain bg-gray-300 focus:outline-none cursor-pointer shadow-sm" oninput="{(e)=>{edit(e, 'updateProfile')}}" checked="{state.updateProfile==='on'?'true':''}" type="checkbox" role="switch" id="flexSwitchCheckDefault">
+                </div>
+                <div class="form-check form-switch mx-8 p-2">
+                    <label class="form-check-label inline-block text-gray-300" for="flexSwitchCheckDefault">send messages</label>
+                    <input class="form-check-input appearance-none mx-4 w-9 -ml-10 rounded-full float-left h-5 align-top bg-white bg-no-repeat bg-contain bg-gray-300 focus:outline-none cursor-pointer shadow-sm" oninput="{(e)=>{edit(e, 'sendMessages')}}" checked="{state.sendMessages==='on'?'true':''}"  type="checkbox" role="switch" id="flexSwitchCheckDefault">
+                </div>
+                <div class="form-check form-switch mx-8 p-2">
+                    <label class="form-check-label inline-block text-gray-300" for="flexSwitchCheckDefault">admin messages</label>
+                    <input class="form-check-input appearance-none mx-4 w-9 -ml-10 rounded-full float-left h-5 align-top bg-white bg-no-repeat bg-contain bg-gray-300 focus:outline-none cursor-pointer shadow-sm" oninput="{(e)=>{edit(e, 'adminMessages')}}" checked="{state.adminMessages==='on'?'true':''}"  type="checkbox" role="switch" id="flexSwitchCheckDefault">
+                </div>
+                <div class="form-check form-switch mx-8 p-2">
+                    <label class="form-check-label inline-block text-gray-300" for="flexSwitchCheckDefault">assign permissions</label>
+                    <input class="form-check-input appearance-none mx-4 w-9 -ml-10 rounded-full float-left h-5 align-top bg-white bg-no-repeat bg-contain bg-gray-300 focus:outline-none cursor-pointer shadow-sm" oninput="{(e)=>{edit(e, 'assignPermissions')}}" checked="{state.assignPermissions==='on'?'true':''}" type="checkbox" role="switch" id="flexSwitchCheckDefault">
+                </div>
+            </form>
+            <button type="button" onclick={close} uk-close></button>
+            <div class="px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                <button type="button" onclick="{submitHandler}" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-gray-300 text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">Save</button>
+                <a href="#/channel/roles/{props.route.params.channelId}" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-gray-300 text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">Cancel</a>
+            </div>
+    </channellayout>
+    <script>
+        export default {
+            edit(e, name) {
+                const conf = {};
+                conf[name] = e.target.value;
+                console.log({conf});
+                this.update(conf)
+            },
+            onBeforeUpdate(props, state) {
+                this.state.id = this.props.route.params.channelId+this.props.route.params.roleId;
+                this.state.channelId = this.props.route.params.channelId;
+                this.state.roleId = this.props.route.params.roleId;
+                console.log(this.state);
+            },
+            async onBeforeMount(props, state) {
+                console.log("LOADING PERMISSION", this.props.route);
+                const loaded = await this.props.app.emit("getPermission", this.props.route.params.channelId+this.props.route.params.roleId);
+                this.update(loaded)
+            },
+            async submitHandler(e) {
+                console.log('saving', this.state);
+                await this.props.app.emit('setPermission', this.state);
+                this.props.app.emit('findPermission');
+            }
+        }
+    </script>
+</channelrole>

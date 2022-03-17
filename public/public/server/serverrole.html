@@ -1,0 +1,53 @@
+
+
+<serverrole>
+    <serverlayout title="server ROLE">
+    
+    <div>
+        <div>
+            <label class="block text-gray-100 text-sm font-bold mb-2" for="title">Name</label>
+            <input class="shadow appearance-none border rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="text" value={state.name} oninput="{(e)=>{edit(e, 'name')}}" placeholder="Name">
+        </div>
+        <div class="form-check form-switch mx-8 p-2">
+            <label class="form-check-label inline-block text-gray-300" for="flexSwitchCheckDefault">Manage channels</label>
+            <input class="form-check-input appearance-none mx-4 w-9 -ml-10 rounded-full float-left h-5 align-top bg-white bg-no-repeat bg-contain bg-gray-300 focus:outline-none cursor-pointer shadow-sm" oninput="{(e)=>{edit(e, 'manageChannels')}}" type="checkbox" role="switch" id="flexSwitchCheckDefault">
+        </div>
+        <div class="form-check form-switch mx-8 p-2">
+            <label class="form-check-label inline-block text-gray-300" for="flexSwitchCheckDefault">Manage roles</label>
+            <input class="form-check-input appearance-none mx-4 w-9 -ml-10 rounded-full float-left h-5 align-top bg-white bg-no-repeat bg-contain bg-gray-300 focus:outline-none cursor-pointer shadow-sm" oninput="{(e)=>{edit(e, 'manageRoles')}}" type="checkbox" role="switch" id="flexSwitchCheckDefault">
+        </div>
+        <div class="form-check form-switch mx-8 p-2">
+            <label class="form-check-label inline-block text-gray-300" for="flexSwitchCheckDefault">Assign roles</label>
+            <input class="form-check-input appearance-none mx-4 w-9 -ml-10 rounded-full float-left h-5 align-top bg-white bg-no-repeat bg-contain bg-gray-300 focus:outline-none cursor-pointer shadow-sm" oninput="{(e)=>{edit(e, 'assignRoles')}}"  type="checkbox" role="switch" id="flexSwitchCheckDefault">
+        </div>
+    </div>
+    <div class="sm:flex sm:flex-row-reverse">
+        <button type="button" onclick={removeRole}
+            class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm">Delete</button>
+        <button type="button" onclick={submitHandler}
+            class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-gray-300 text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">Save</button>
+        <a href="#/home" onclick={close}
+            class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-gray-300 text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">Cancel</a>
+    </div>
+
+    </serverlayout>
+
+    <script>
+        export default {
+            edit(e, name) {
+                const conf = {};
+                conf[name] = e.target.value;
+                this.update(conf);
+                console.log(this.state);
+            },
+            onBeforeMount(props, state) {
+                this.state={}
+                return props;
+            },
+            async removeRole(e) {
+                await this.props.app?.emit('removeRole', this.props.route.params.roleId);
+                this.props.app?.emit('findRole');
+            }
+        }
+    </script>
+</serverrole>

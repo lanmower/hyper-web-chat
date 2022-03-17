@@ -1,0 +1,78 @@
+
+
+<editor>
+      <div class="relative">
+        <div
+          class="bg-gray-50 border border-b-0 border-gray-300 top-0 left-0 right-0 block rounded-t-md"
+        >
+          <button
+            type="button"
+            class="py-2 px-4 inline-block text-gray-400 font-semibold"
+            onclick="{()=>{set('view', 'edit')}}"
+          >
+            Write
+          </button>
+          <button
+            type="button"
+            class="py-2 px-4 inline-block text-gray-400 font-semibold"
+            onclick="{()=>{set('view', 'preview')}}"
+          >
+            Preview
+          </button>
+        </div>
+  
+        <textarea hidden name="content"></textarea>
+  
+        <div class="w-full">
+          <div
+            style="display:{state.view=='edit'?'block':'none'}"
+            id="edit"
+            class="w-full max-w-none prose-indigo leading-6 rounded-b-md shadow-sm border border-gray-300 p-5 bg-white overflow-y-auto"
+          ></div>
+          <div
+            style="display:{state.view=='preview'?'block':'none'}"
+            id="preview"
+            class="w-full max-w-none prose-indigo leading-6 rounded-b-md shadow-sm border border-gray-300 p-5 bg-white overflow-y-auto"
+          > 
+            {state.body} 
+          </div>
+        </div>
+      </div>
+  
+    <script>
+      export default {
+        onBeforeMount(props, state) {
+          this.state = {
+            body: "",
+            view: "edit",
+          };
+        },
+        onMounted() {
+          var cm = CodeMirror(this.$("#edit"), {
+            value: "",
+            mode: {
+              name: "markdown",
+              highlightFormatting: true,
+            },
+            lineWrapping: true,
+            tabSize: 2,
+            theme: "markdown",
+          });
+          cm.on(
+            "change",
+            ((cm, change) => {
+              this.update({ body: cm.getValue() });
+              this.props.update({ body: cm.getValue() });
+            }).bind(this)
+          );
+        },
+        set(name, value) {
+          let upd = {};
+          upd[name] = value;
+          this.update(upd);
+          const data = this.state;
+        },
+      };
+    </script>
+  </editor>
+  

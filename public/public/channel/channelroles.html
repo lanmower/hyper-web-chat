@@ -1,0 +1,20 @@
+<channelroles>
+  <channellayout
+    channels="{props.app.channels}"
+    route={props.route}
+    title="permissions"
+    description="role selection"
+  >
+    <div class="flex justify-center w-full">
+      <div class="bg-gray-800 rounded-lg w-96">
+        <a
+          each="{role in Object.entries(props.app.roles)}"
+          href="#/channel/{props.app.channelId}/role/{role[0]}"
+          class="block px-6 py-2 w-full hover:bg-blue-600 hover:text-gray-200 focus:outline-none focus:ring-0 focus:bg-gray-200 focus:text-gray-600 transition duration-500 cursor-pointer rounded-lg"
+        >
+          {role[1].name}
+        </a>
+      </div>
+    </div>
+  </channellayout>
+</channelroles>

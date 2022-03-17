@@ -1,0 +1,30 @@
+<messageslayout>
+  <div class="flex-1 flex flex-col min-h-screen h-screen">
+    <navbar
+      channels="{props.app?.channels}"
+      app="{props.app}"
+      title="{props.app?.channels[props.app?.channelId]?.name}"
+      servertitle="{}"
+    ></navbar>
+    <div class="flex-1 flex overflow-y-hidden">
+      <div class="bg-gray-800 w-56 flex-none flex flex-col justify-between">
+        <channellist
+          channels="{props.app?.channels}"
+          emit="{props.app?.emit}"
+          parentUpdate="{props.update}"
+        ></channellist>
+        <config name="{props.app?.name}"></config>
+      </div>
+      <div class="flex-1 flex justify-between">
+        <div class="bg-gray-750 flex-1 flex flex-col justify-between">
+          <slot />
+        </div>
+        <userlist
+          name="{props.app?.name}"
+          users="{props.app?.profiles}"
+          emit="{props.app?.emit}"
+        ></userlist>
+      </div>
+    </div>
+  </div>
+</messageslayout>

@@ -1,0 +1,19 @@
+
+
+<serverprofile>
+    <serverlayout title="profile">
+    
+    <div class="m-4">
+        <label class="block text-gray-100 text-sm font-bold mb-2" for="title">
+        Title
+        </label>
+        <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="title" type="text" oninput="{(e)=>{edit(e, serverTitle)}}" placeholder="Title">
+    </div>
+    <div class="m-4">
+        <label class="block text-gray-100 text-sm font-bold mb-2" for="title">
+            Description
+        </label>
+        <editor update={descriptionGetter}/>
+    </div>
+    </serverlayout>
+</serverprofile>
