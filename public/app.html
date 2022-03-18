@@ -1,110 +1,60 @@
-    <app>
-    <router initial-route={state.initialRoute} base={state.base}>
-        <route path="/home">
-            <div class="flex-1 flex flex-col min-h-screen h-screen">
-                <navbar channels="{state.channels}" title="{state?.channels[state?.channelId]?.name}" titlechannelId="{state.channelId}"></navbar>
-                <div class="flex-1 flex overflow-y-hidden">
-                    <div class="bg-gray-800 w-56 flex-none flex flex-col justify-between">
-                        <channellist channels={state.channels} emit={emit} parentUpdate={update}></channellist>
-                        <config name={state.name}></config>
-                    </div>
-                    <div class="flex-1 flex justify-between">
-                        <div class="bg-gray-750 flex-1 flex flex-col justify-between">
-                            <messages class="chat text-sm text-gray-400 overflow-y-auto" channelId={state.channelId} messages={state.messages} emit={emit}></messages>
-                            <sendmessage class="bg-gray-750 h-24 flex items-center mx-3 border-t border-gray-600" emit="{emit}" channelId={state.channelId} ></sendmessage>
-                        </div>
-                        <userlist name={state.name} users={state.profiles} emit={emit}></userlist>
-
-                    </div>
-                </div>
-            </div>
-        </route>
-        <route path="/editchannel/:channelId">
-            <div class="flex-1 flex flex-col min-h-screen h-screen">
-                <navbar channels="{state.channels}" description="CHANNEL DETAILS" title="{state?.channels[state?.channelId]?.name}" channelId="{state.channelId}"></navbar>
-                <div class="flex-1 flex overflow-y-hidden">
-                    <div class="bg-gray-800 w-56 flex-none flex flex-col justify-between">
-                        <channellist channels={state.channels} emit={emit} parentUpdate={update}></channellist>
-                    </div>
-                    <div class="flex-1 flex justify-between">
-                        <editchannel channel="{state?.channels[route?.params?.channelId]}"  emit="{emit}" channelId="{route?.params?.channelId}"></editchannel>
-                    </div>
-                </div>
-            </div>
-        </route>
-        <route path="/createchannel">
-            <div class="flex-1 flex flex-col min-h-screen h-screen">
-                <navbar channels="{state.channels}" description="CHANNEL DETAILS" channelId="{state.channelId}"></navbar>
-                <div class="flex-1 flex overflow-y-hidden">
-                    <div class="bg-gray-800 w-56 flex-none flex flex-col justify-between">
-                        <channellist channels={state.channels} emit={emit} parentUpdate={update}></channellist>
-                    </div>
-                    <div class="flex-1 flex justify-between">
-                        <editchannel channel="{}" emit="{emit}" channelId="{null}"></editchannel>
-                    </div>
-                </div>
-            </div>
-        </route>
-    </router>
-    <script>
-        const initialRoute = `${window.location.hash ? window.location.hash.replace('#', '') : '/home'}`
-        export default {
-            components: {
-                router: route.Router,
-                route: route.Route,
-            },
-            state: {
-                initialRoute,
-                base: `/#`,
-                messages: {
-
-                },
-                channels: {
-
-                },
-                roles: {
-                    "everyone": []
-                },
-                permissions: {
-
-                },
-                profiles: {
-
-                }
-            },
-            actions: window.actions,
-            emit(action, input = '') {
-                const self = this;
-                const socket = window.socket;
-                return new Promise((res) => {
-                    if (socket && socket.readyState === WebSocket.CONNECTING) {
-                        console.log('not connected, waiting');
-                        socket.addEventListener('open', (event) => {
-                            console.log('socket open');
-                            res(socket.send(sign({ action, input, keyPair })));
-                        });
-                    } else if (socket && socket.readyState === WebSocket.OPEN) {
-                        res(socket.send(sign({ action, input, keyPair })))
-                    };
-                })
-            },
-            onUpdated() {
-                setTimeout(this.scrollDown, 100);
-                console.log(this.state);
-            },
-            scrollDown() {
-                    const chat = this.$('.chat');
-                    if(chat) chat.scrollTop = chat.scrollHeight;
-            },
-            onMounted() {
-                const me = this;
-                window.app = this;
-                this.emit('getChannels')
-                this.emit('getProfile')
-                this.emit('getProfiles')
-                this.emit('getRoles')
-                setTimeout(this.scrollDown, 1000);
-            }
-        };
-    </script>
+<app>
+  <router initial-route="{state.initialRoute}" base="{state.base}">
+    <route path="/home">
+      <div is="messages" app="{state}" emit="{emit}" route="{route}"></div>
+    </route>
+    <route each="{item in this.routes}" path="{item.path}">
+      <div
+        is="{item.is}"
+        app="{state}"
+        if="{item.path.includes(':')?Object.keys(route.params).length:true}"
+        route="{route}"
+      ></div>
+    </route>
+  </router>
+  <script>
+    const initialRoute = `${
+      window.location.hash ? window.location.hash.replace("#", "") : "/home"
+    }`;
+    export default {
+      components: {
+        router: route.Router,
+        route: route.Route,
+      },
+      routes: [
+        { path: "/channel/profile/:channelId", is: "channelprofile" },
+        { path: "/channel/roles/:channelId", is: "channelroles" },
+        { path: "/channel/:channelId/role/:roleId", is: "channelrole" },
+        { path: "/server/role/:id", is: "serverrole" },
+        { path: "/channel/create", is: "channelprofile" },
+        { path: "/channel/create", is: "messages" },
+        { path: "/server/profile", is: "serverprofile" },
+        { path: "/server/roles", is: "serverroles" },
+      ],
+      init: ["getProfile", "findProfile", "findPermission", "findRole"],
+      emit(action, parameters = "") {
+        return window.emit(action, parameters);
+      },
+      state: {
+        initialRoute,
+        base: `/#`,
+        messages: {},
+        channels: {},
+        roles: {},
+        permissions: {},
+        profiles: {},
+        emit: this.emit,
+      },
+      actions: window.actions,
+      async onMounted() {
+        window.app=this;
+        const channels = await emit("findChannel");
+        const id = Object.keys(channels)[0];
+        const messages = await this.emit("historyMessage", { id });
+        this.state.messages[id] = Object.values(messages||{}).reverse();
+        this.update({ channels, channelId: id });
+        for (item of this.init) this.emit(item);
+      },
+    };
+  </script>
 </app>

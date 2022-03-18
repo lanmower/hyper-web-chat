@@ -2,16 +2,18 @@ window.packr = new msgpackr.Packr({ structuredClone: true });
 const C = {
   CONTRACT: 'c',
   ACTION: 'a',
-  INPUT: 'i',
+  PARAMETERS: 'p',
   TRANSACTION: 't',
   KEYS: 'k',
   SIGNATURE: 's',
-  PUBLICKEY: 'k'
+  PUBLICKEY: 'k',
+  ID:'i'
 };
 window.sign = (from) => {
   const tx = {};
   tx[C.ACTION] = from.action;
-  tx[C.INPUT] = from.input;
+  tx[C.PARAMETERS] = from.parameters;
+  tx[C.ID] = from.id;
   const keyUint8Array = new Uint8Array(Buffer.from(from.keyPair.secretKey, "hex"));
   const packed = packr.pack(tx);
   const out = {};

@@ -1,6 +1,7 @@
 require('dotenv').config()
 global.crypto = require("hypercore-crypto");
 global.Packr = require("msgpackr").Packr;
+
 global.Hyperbee = require('hyperbee');
 global.SDK = require("hyper-sdk");
 const express = global.express = require('express'); //runtime lib downloading/async
@@ -29,12 +30,10 @@ const fs = require('fs');
         const hook = new Webhook(args.channel.discordWebhook);
         hook.setUsername(args.name);
         const avatar = args.avatar||`https://avatars.dicebear.com/api/pixel-art-neutral/${args.name}.png`;
-        console.log({avatar, args})
         hook.setAvatar(avatar);
-        console.log(args);
         hook.send(args.body);
       }
-      const data = packr.pack({ action, i: args })
+      const data = packr.pack({ action, p: args })
       wss.clients.forEach(function each(client) {
         if (client.readyState === OPEN) {
           if (client.rooms && client.rooms.includes(room)) {
@@ -52,11 +51,11 @@ const fs = require('fs');
     const socketId = crypto.randomBytes(32).toString('hex');
     ws.rooms = [];
     let key = null;
-    const emit = async (to, action, args, ws) => {
+    const emit = async (to, action, id, args, ws) => {
       if(action == 'join') {
         if(!ws.rooms.includes(to)) ws.rooms.push(to)
       } else {
-        ws.send(packr.pack({ action, i: args }))
+        ws.send(packr.pack({ action, i:id, p: args }))
       }
     };
     var debounce = require('debounce');
@@ -79,13 +78,15 @@ const fs = require('fs');
         key = out.k;
         if(!sockets[key]) sockets[key] = [];
         sockets[key].push(socketId);
-        const socketEmit = (to, type, args) => { emit(to, type, args, ws) };
-        emit(out.k, 'join', {}, ws);
+        const socketEmit = (to, type, id, args) => { 
+          emit(to, type, id, args, ws)
+        };
+        emit(out.k, 'join', '', {}, ws);
         const socketBroadcast = (to, type, args) => { broadcast(to, type, args, ws) };
-        const ret = await action(out, socketEmit, socketBroadcast, socketId);
-
-        await ws.send(packr.pack({ action: out.t.a, i: ret }));
+        const ret = await action(out.t.i, out, socketEmit, socketBroadcast, socketId);
+        await ws.send(packr.pack({ i:out.t.i, action: out.t.a, p: ret }));
       } catch(e) {
+        console.error(e);
         console.trace(e);
       }
     });
